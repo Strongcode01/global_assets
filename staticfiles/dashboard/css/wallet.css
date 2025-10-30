@@ -1,0 +1,54 @@
+/* wallet.css */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #e9f0ff, #f5f7ff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.wallet-container {
+  background: white;
+  width: 400px;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.wallet-container h2 {
+  color: #4a6cf7;
+  margin-bottom: 20px;
+}
+
+.wallet-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+.wallet-container input:focus {
+  border-color: #4a6cf7;
+  box-shadow: 0 0 3px rgba(74, 108, 247, 0.5);
+}
+
+.wallet-container button {
+  background: #4a6cf7;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  margin-top: 15px;
+  width: 100%;
+  font-weight: 600;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.wallet-container button:hover {
+  background: #3b5be0;
+}

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -150,7 +151,7 @@ LOGIN_REDIRECT_URL = reverse_lazy('dashboard:dashboard')
 LOGOUT_REDIRECT_URL = reverse_lazy('core:home')
 
 raw_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "http://127.0.0.1:8000, http://localhost:8000")
-CSRF_TRUSTED_ORIGINS = ["https://cit306.onrender.com"]
+CSRF_TRUSTED_ORIGINS = ["https://global-assets.onrender.com"]
 #  Cookie security: only enable secure cookies in production (when DEBUG is False and using HTTPS)
 if DEBUG:
     CSRF_COOKIE_SECURE = False
