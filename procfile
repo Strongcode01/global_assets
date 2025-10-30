@@ -1,0 +1,1 @@
+web: gunicorn SKY_GLOBAL_ASSETS_PROJECT.wsgi:application

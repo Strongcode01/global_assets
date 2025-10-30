@@ -1,0 +1,26 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block title %}Investments{% endblock %}
+{% block content %}
+<div class="investments-card">
+  <h2>Investment Options</h2>
+  <div class="actions">
+    <button>QFS Agency</button>
+    <button>Invest</button>
+    <button>Medbed</button>
+    <button>401k</button>
+  </div>
+  <h3>My Active Plans</h3>
+  {% if investments %}
+    <ul class="investment-list">
+      {% for inv in investments %}
+      <li>
+        <strong>{{ inv.plan_name }}</strong> — ${{ inv.amount }} ({{ inv.status }})
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No active investments yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

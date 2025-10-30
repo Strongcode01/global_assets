@@ -1,0 +1,11 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Swap{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h2>Swap Assets</h2>
+  <p>Balance: ${{ profile.total_balance }}</p>
+  <form method="POST">{% csrf_token %}{{ form.as_p }}
+    <button type="submit">Swap</button>
+  </form>
+</div>
+{% endblock %}

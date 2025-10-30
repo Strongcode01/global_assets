@@ -1,0 +1,467 @@
+/* =========================================
+   Global Color Variables
+========================================= */
+:root[data-theme='light'] {
+  --bg: #f5f7fb;
+  --card-bg: #ffffff;
+  --text: #222831;
+  --text-light: #acacac;
+  --accent: #062664;
+  --accent-hover: #021030;
+  --accent-gradient: linear-gradient(90deg, #04193a, #2b055e);
+  --border-color: #e5e7eb;
+  --shadow: rgba(41, 33, 33, 0.05);
+  --success: #06d6a0;
+  --danger: #ef476f;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0f1117;
+  --card-bg: #1b1f27;
+  --text: #ffffff;
+  --text-light: #fefeff;
+  --accent: #bb86fc;
+  --accent-hover: #985eff;
+  --accent-gradient: linear-gradient(90deg, #04193a, #2b055e);
+  --border-color: #2b2f3a;
+  --shadow: rgba(0, 0, 0, 0.2);
+  --success: #00c896;
+  --danger: #ff5c8d;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  /* color: #bdbdbd; */
+  transition: background 0.3s, color 0.3s;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--card-bg);
+  padding: 20px;
+  width: 250px;
+  height: 95vh;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: static;
+}
+
+.sidebar nav a {
+  display: block;
+  color: var(--text);
+  padding: 10px 0;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.sidebar nav a:hover {
+  color: var(--accent);
+}
+
+.brand {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+#theme-toggle {
+  background: var(--accent);
+  border: none;
+  color: white;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.verified { color: green; font-weight: bold; }
+.unverified { color: red; font-weight: bold; }
+
+button {
+  background: var(--accent);
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+button:hover { opacity: 0.9; }
+
+footer {
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  background: var(--card-bg);
+}
+
+/* ===========================
+   Cards Grid (Dashboard)
+=========================== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.card h3 {
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+
+/* Balance Card */
+.balance h2 {
+  font-size: 2rem;
+  margin: 10px 0;
+}
+
+.balance p {
+  font-size: 0.95rem;
+}
+
+/* Wallets List */
+.wallets ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.wallets li {
+  padding: 8px 10px;
+  border-bottom: 1px solid #ddd;
+  color: var(--text);
+}
+
+/* Quick Action Buttons */
+.actions .buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.actions button {
+  flex: 1 1 45%;
+  background: var(--accent-gradient);
+  border: none;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+.actions button:hover {
+  opacity: 0.85;
+}
+
+/* Verified / Unverified Text */
+.verified {
+  color: var(--success);
+  font-weight: 600;
+}
+.unverified {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* ===========================
+   Wallet Link Form
+=========================== */
+.wallet-form-container {
+  max-width: 500px;
+  margin: 40px auto;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 30px;
+}
+
+.wallet-form-container h2 {
+  text-align: center;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+.wallet-form .form-group {
+  margin-bottom: 20px;
+  width: 100%;
+  font-size: 14px;
+  box-shadow: #222831;
+
+}
+
+.wallet-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.wallet-form input, .wallet-form textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  transition: border 0.3s;
+}
+.wallet-form input:focus, .wallet-form textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.wallet-form button {
+  width: 100%;
+  background: var(--accent-gradient);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+.wallet-form button:hover {
+  opacity: 0.9;
+}
+
+/* ===========================
+   KYC Verification
+=========================== */
+.kyc-form {
+  max-width: 600px;
+  margin: 40px auto;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 30px;
+}
+
+.kyc-form h2 {
+  text-align: center;
+  color: var(--accent);
+  margin-bottom: 15px;
+}
+
+.kyc-form form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.kyc-form input[type="text"],
+.kyc-form input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+  transition: border 0.3s;
+}
+
+.kyc-form input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.kyc-form button {
+  width: 100%;
+  background: var(--accent-gradient);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.kyc-form button:hover {
+  opacity: 0.9;
+}
+
+/* ===========================
+   Investments Section
+=========================== */
+.investments-card {
+  max-width: 800px;
+  margin: 40px auto;
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.investments-card h2 {
+  color: var(--accent);
+  margin-bottom: 15px;
+}
+
+.investments-card .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.investments-card button {
+  flex: 1 1 45%;
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.investments-card button:hover {
+  opacity: 0.9;
+}
+
+.investment-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.investment-list li {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+/* ===========================
+   Transactions Section
+=========================== */
+.transactions-card {
+  max-width: 900px;
+  margin: 40px auto;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 30px;
+}
+
+.transactions-card h2 {
+  color: var(--accent);
+  margin-bottom: 15px;
+}
+
+.transactions-card .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.transactions-card button {
+  flex: 1 1 45%;
+  background: var(--accent-gradient);
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.transactions-card button:hover {
+  opacity: 0.9;
+}
+
+.txn-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.txn-table th, .txn-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+.txn-table th {
+  background: var(--accent);
+  color: white;
+}
+.txn-table tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* ===========================
+   Mobile Responsiveness
+=========================== */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .content {
+    padding: 20px;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions button {
+    flex: 1 1 100%;
+  }
+
+  .investments-card .actions button,
+  .transactions-card .actions button {
+    flex: 1 1 100%;
+  }
+
+  .wallet-form-container,
+  .kyc-form,
+  .investments-card,
+  .transactions-card {
+    margin: 20px;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome h2 {
+    font-size: 1.4rem;
+  }
+
+  .card {
+    padding: 15px;
+  }
+
+  button {
+    font-size: 14px;
+    padding: 10px;
+  }
+}

@@ -1,0 +1,30 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block title %}Transactions{% endblock %}
+{% block content %}
+<div class="transactions-card">
+  <h2>Wallet Actions</h2>
+  <div class="actions">
+    <button>Buy</button>
+    <button>Deposit</button>
+    <button>Withdraw</button>
+    <button>Swap</button>
+  </div>
+  <h3>Recent Transactions</h3>
+  {% if transactions %}
+    <table class="txn-table">
+      <tr><th>Date</th><th>Type</th><th>Amount</th><th>Status</th></tr>
+      {% for txn in transactions %}
+      <tr>
+        <td>{{ txn.date|date:"M d, Y" }}</td>
+        <td>{{ txn.type }}</td>
+        <td>${{ txn.amount }}</td>
+        <td>{{ txn.status }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No transactions yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

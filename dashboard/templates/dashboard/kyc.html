@@ -1,0 +1,22 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block title %}KYC Verification{% endblock %}
+{% block content %}
+<div class="kyc-form">
+  <h2>🪪 KYC Verification</h2>
+  <p>Verification Status:
+    {% if profile.kyc_verified %}
+      <span class="verified">Verified ✔</span>
+    {% else %}
+      <span class="unverified">Pending ✖</span>
+    {% endif %}
+  </p>
+
+  <p>Provide your details below to complete identity verification.</p>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+  </form>
+</div>
+{% endblock %}

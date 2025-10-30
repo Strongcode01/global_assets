@@ -1,0 +1,120 @@
+/* dashboard.css */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #f0f4ff, #e5ecff);
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+.dashboard {
+  max-width: 800px;
+  margin: 50px auto;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #4a6cf7;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+}
+
+.top-bar .email {
+  font-weight: 600;
+}
+
+.top-bar .btn {
+  background: white;
+  color: #4a6cf7;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.top-bar .btn:hover {
+  background: #e8edff;
+}
+
+.balance-card {
+  text-align: center;
+  margin: 30px 0;
+  background: #f8faff;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #dee3ff;
+}
+
+.balance-title {
+  color: #6a6a6a;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.balance-card h2 {
+  color: #2d3df8;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.kyc {
+  margin: 15px 0;
+}
+
+.verified {
+  color: green;
+  font-weight: bold;
+}
+
+.unverified {
+  color: red;
+  font-weight: bold;
+}
+
+.btn.verify {
+  background: #4a6cf7;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn.verify:hover {
+  background: #3c5be6;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.actions button {
+  background: #4a6cf7;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.actions button:hover {
+  background: #3b58e0;
+}
+
+.actions a button {
+  width: 100%;
+}
