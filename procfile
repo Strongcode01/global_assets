@@ -1,1 +1,1 @@
-web: gunicorn SKY_GLOBAL_ASSETS_PROJECT.wsgi:application
+web: gunicorn sky_global_assets_project.wsgi:application
