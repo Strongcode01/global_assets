@@ -3,29 +3,212 @@
 
 {% block title %}Link Wallet{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Wallet form styling - clean and responsive */
+.wallet-form-container {
+  max-width: 720px;
+  margin: 48px auto;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(2,6,23,0.06);
+  padding: 28px;
+  color: var(--text);
+  border: 1px solid rgba(0,0,0,0.03);
+}
+
+.wallet-form-container h2 {
+  margin: 0 0 12px;
+  color: var(--accent);
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.wallet-form p.helper {
+  margin: 6px 0 18px;
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+/* Form layout */
+.wallet-form .form-group {
+  margin-bottom: 16px;
+}
+
+/* Select styling */
+.wallet-form select.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  font-size: 0.97rem;
+  color: var(--text);
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text) 50%),
+                    linear-gradient(135deg, var(--text) 50%, transparent 50%),
+                    linear-gradient(to right, var(--border-color), var(--border-color));
+  background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px), calc(100% - 2px) 0.5em;
+  background-size: 7px 7px, 7px 7px, 1px 1.5em;
+  background-repeat: no-repeat;
+}
+
+/* Textarea styling */
+.wallet-form textarea.form-control {
+  width: 100%;
+  min-height: 96px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  resize: vertical;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  background: transparent;
+  color: var(--text);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+/* focus state */
+.wallet-form textarea.form-control:focus,
+.wallet-form select.form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+  outline: none;
+}
+
+/* word counter + validation */
+.phrase-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+}
+.word-count {
+  font-size: 0.92rem;
+  color: var(--text-light);
+}
+.word-count.valid { color: var(--success); font-weight: 700; }
+.word-count.invalid { color: var(--danger); font-weight: 700; }
+
+/* submit */
+.wallet-form button[type="submit"] {
+  width: 100%;
+  margin-top: 18px;
+  background: var(--accent-gradient);
+  border: 0;
+  padding: 12px 14px;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+.wallet-form button[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* small error text */
+.field-errors {
+  color: var(--danger);
+  font-size: 0.95rem;
+  margin-top: 6px;
+}
+
+/* responsive */
+@media (max-width: 640px) {
+  .wallet-form-container { padding: 18px; margin: 24px; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="wallet-form-container">
-  <h2>🔗 Link and Backup Your Wallet</h2>
-  <form method="POST" class="wallet-form">
+<div class="wallet-form-container" role="region" aria-labelledby="wallet-form-heading">
+  <h2 id="wallet-form-heading">🔗 Link and Backup Your Wallet</h2>
+
+  <form method="POST" class="wallet-form" novalidate>
     {% csrf_token %}
     {{ form.non_field_errors }}
-    <div class="form-group" style="width: 100%; font-size: 14px; ">
+
+    <div class="form-group">
+      <label for="{{ form.wallet_name.id_for_label }}">Choose Wallet</label>
       {{ form.wallet_name }}
-      {{ form.wallet_name.errors }}
+      {% if form.wallet_name.errors %}
+        <div class="field-errors">{{ form.wallet_name.errors|striptags }}</div>
+      {% endif %}
     </div>
 
     <div class="form-group">
+      <label for="{{ form.wallet_phrase.id_for_label }}">Recovery Phrase (12 words)</label>
       {{ form.wallet_phrase }}
-      {{ form.wallet_phrase.errors }}
+      {% if form.wallet_phrase.errors %}
+        <div class="field-errors">{{ form.wallet_phrase.errors|striptags }}</div>
+      {% endif %}
+
+      <div class="phrase-meta" aria-live="polite">
+        <strong><div class="word-count" id="wordCount">Phrase count: 0</div></strong>
+      </div>
     </div>
 
-    <button type="submit">Link Wallet</button>
+    <button type="submit" id="linkWalletBtn">Link Wallet</button>
   </form>
 </div>
-{% endblock %}
 
-{% block extra_css %}
-<style>
+<script>
+/* Client-side helper: live word count and simple prevention when not 12 words.
+   Server-side validation remains authoritative.
+*/
+(function(){
+  const textarea = document.querySelector('textarea[name="wallet_phrase"]');
+  const btn = document.getElementById('linkWalletBtn');
+  const counter = document.getElementById('wordCount');
+  const hint = document.getElementById('phraseHint');
 
-</style>
+  if (!textarea) return;
+
+  function countWords(text) {
+    // Trim and split on any whitespace
+    const tokens = text.trim().split(/\s+/).filter(Boolean);
+    return tokens.length;
+  }
+
+  function update() {
+    const val = textarea.value || '';
+    const n = countWords(val);
+    counter.textContent = `Phrase count: ${n}`;
+    if (n === 12) {
+      counter.classList.remove('invalid');
+      counter.classList.add('valid');
+      btn.disabled = false;
+    } else {
+      counter.classList.remove('valid');
+      counter.classList.add('invalid');
+      btn.disabled = true;
+    }
+  }
+
+  // Initialize on load
+  update();
+
+  // Live update
+  textarea.addEventListener('input', update);
+
+  // Extra: prevent accidental submit when JS thinks count != 12
+  document.querySelector('.wallet-form').addEventListener('submit', function (e) {
+    const n = countWords(textarea.value || '');
+    if (n !== 12) {
+      e.preventDefault();
+      textarea.focus();
+      update();
+      // Announce to screen readers
+      hint.setAttribute('aria-live', 'assertive');
+    }
+  });
+})();
+</script>
 {% endblock %}

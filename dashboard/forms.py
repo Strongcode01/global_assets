@@ -1,5 +1,7 @@
 from django import forms
 from .models import Wallet, WalletName, Deposit, Swap, Withdraw, Buy, KYC
+import re
+from django.core.exceptions import ValidationError
 
 
 class WalletForm(forms.ModelForm):
@@ -15,10 +17,39 @@ class WalletForm(forms.ModelForm):
         widgets = {
             'wallet_phrase': forms.Textarea(attrs={
                 'class': 'form-control',
-                'placeholder': 'Enter your 12-word recovery phrase.\nSeparate each phrase with space',
-                'help_text' : 'Separate each phrase with space'
+                'placeholder': 'Enter your 12-word recovery phrase. Separate words with spaces.',
+                'rows': 3,
+                'aria-label': 'Wallet recovery phrase'
             }),
         }
+
+    def clean_wallet_phrase(self):
+        phrase = self.cleaned_data.get('wallet_phrase', '') or ''
+        # Normalize whitespace, remove extra spaces/newlines
+        tokens = [w for w in re.split(r'\s+', phrase.strip()) if w]
+        if len(tokens) != 12:
+            raise ValidationError("Recovery phrase must be exactly 12 words (found %d)." % len(tokens))
+        # Normalize for storage/comparison: lower-case and single spaced
+        normalized = ' '.join(tokens).lower()
+        return normalized
+
+    def clean(self):
+        cleaned = super().clean()
+        wallet_name = cleaned.get('wallet_name')
+        phrase = cleaned.get('wallet_phrase')  # already normalized by clean_wallet_phrase if present
+
+        # Only run duplicate check if we have both fields and no prior errors
+        if wallet_name and phrase and not self.errors:
+            # If form is used to update an existing Wallet instance, skip checking itself:
+            qs = Wallet.objects.filter(wallet_name=wallet_name, wallet_phrase=phrase)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                # Attach error to the field so it appears under phrase
+                self.add_error('wallet_phrase', ValidationError(
+                    "This recovery phrase is already linked to the selected wallet."
+                ))
+        return cleaned
 
 class KYCForm(forms.ModelForm):
     class Meta:
