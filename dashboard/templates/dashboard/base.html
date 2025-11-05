@@ -260,39 +260,38 @@
         <main class="content">
           <div class="welcome-profile">
             <div class="profile-info" role="region" aria-label="User profile summary">
-              {% if kyc_verified %}
-                <span class="verified" aria-hidden="true">✔</span>
+              
+              <!-- Profile Picture -->
+              {% if profile_pic_url %}
+                <img src="{{ profile_pic_url }}" 
+                    alt="{{ request.user.username }}'s profile picture"
+                    class="profile-avatar" loading="lazy" width="110" height="110">
+              {% else %}
+                <img src="{% static 'dashboard/images/default-avatar.png' %}" 
+                    alt="Default avatar" class="profile-avatar" loading="lazy" width="110" height="110">
+              {% endif %}
 
-                {% if profile_pic_url %}
-                  <img src="{{ profile_pic_url }}" alt="{{ request.user.username }}'s profile picture"
-                      class="profile-avatar" loading="lazy" width="110" height="110">
-                {% else %}
-                  <img src="{% static 'dashboard/images/default-avatar.png' %}"
-                      alt="Default avatar" class="profile-avatar" loading="lazy" width="110" height="110">
-                {% endif %}
-
+              <!-- Welcome Message -->
+              {% if kyc and kyc.status == "verified" %}
                 <h2 class="welcome-title">
                   Welcome, {{ request.user.username|default:"User" }}
-                  {% if kyc %}
-                    <small class="kyc-status-text">{{ kyc.status|default:"N/A" }}</small>
-                  {% endif %}
+                  <small class="kyc-status-text verified"> ✔ </small>
                 </h2>
-
+              {% elif kyc and kyc.status == "pending" %}
+                <h2 class="welcome-title">
+                  Hi, {{ request.user.username|default:"User" }}
+                  <small class="kyc-status-text pending" style="color: orangered;">  ✖  </small>
+                </h2>
               {% else %}
-                <span class="unverified" aria-hidden="true">✖</span>
-
-                {% if profile_pic_url %}
-                  <img src="{{ profile_pic_url }}" alt="{{ request.user.username }}'s profile picture"
-                      class="profile-avatar" loading="lazy" width="110" height="110">
-                {% else %}
-                  <img src="{% static 'dashboard/images/default-avatar.png' %}"
-                      alt="Default avatar" class="profile-avatar" loading="lazy" width="110" height="110">
-                {% endif %}
-
-                <h4 class="welcome-subtitle">Hi, {{ request.user.username|default:"User" }}</h4>
+                <h2 class="welcome-title">
+                  Hi, {{ request.user.username|default:"User" }}
+                  <small class="kyc-status-text unverified"> ✖ </small>
+                </h2>
               {% endif %}
+
             </div>
           </div>
+
 
           <!-- LIVE CRYPTO WIDGETS START -->
           <div class="crypto-widgets" aria-live="polite">
