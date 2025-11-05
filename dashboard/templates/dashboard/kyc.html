@@ -1,22 +1,56 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
-{% block title %}KYC Verification{% endblock %}
-{% block content %}
-<div class="kyc-form">
-  <h2>🪪 KYC Verification</h2>
-  <p>Verification Status:
-    {% if profile.kyc_verified %}
-      <span class="verified">Verified ✔</span>
-    {% else %}
-      <span class="unverified">Pending ✖</span>
-    {% endif %}
-  </p>
 
-  <p>Provide your details below to complete identity verification.</p>
-  <form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit</button>
-  </form>
+{% block content %}
+<div class="kyc-container">
+    <h2>KYC Verification</h2>
+    <form method="post" enctype="multipart/form-data" class="kyc-form">
+        {% csrf_token %}
+        
+        <!-- Display non-field errors (like form validation issues) -->
+        {% if form.non_field_errors %}
+            <div class="form-errors">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+        
+        <div class="form-group">
+            {{ form.full_name.label_tag }}
+            {{ form.full_name }}
+            {{ form.full_name.errors }}
+        </div>
+
+        <div class="form-group">
+            {{ form.country.label_tag }}
+            {{ form.country }}
+            {{ form.country.errors }}
+        </div>
+
+        <div class="form-group">
+            {{ form.id_type.label_tag }}
+            {{ form.id_type }}
+            {{ form.id_type.errors }}
+        </div>
+
+        <div class="form-group">
+            {{ form.id_number.label_tag }}
+            {{ form.id_number }}
+            {{ form.id_number.errors }}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.kyc_doc.id_for_label }}">KYC Document</label>
+            {{ form.kyc_doc }}
+            {{ form.kyc_doc.errors }}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.profile_pic.id_for_label }}">Profile Picture</label>
+            {{ form.profile_pic }}
+            {{ form.profile_pic.errors }}
+        </div>
+
+        <button type="submit" class="btn-submit">Submit KYC</button>
+    </form>
 </div>
 {% endblock %}

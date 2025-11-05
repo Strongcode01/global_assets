@@ -56,6 +56,12 @@ def create_user_profile(sender, instance, created, **kwargs):
         UserProfile.objects.create(user=instance)
 
 class KYC(models.Model):
+    STATUS_CHOICES = [
+        ('unverified', 'Unverified'),
+        ('pending', 'Pending'),
+        ('verified', 'Verified'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=255)
     country = models.CharField(max_length=100)
@@ -63,18 +69,17 @@ class KYC(models.Model):
     id_number = models.CharField(max_length=100)
     kyc_doc = models.FileField(upload_to='kyc_docs/')
     profile_pic = models.ImageField(upload_to='profile_pics/')
-    verified = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='unverified')
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         profile, _ = UserProfile.objects.get_or_create(user=self.user)
-        profile.kyc_verified = self.verified
+        profile.kyc_verified = (self.status == 'verified')
         profile.save()
 
-
     def __str__(self):
-        return f"{self.user.username} - KYC"
+        return f"{self.user.username} - {self.get_status_display()}"
 # ===================================================================================================================================
 # ===================================================================================================================================
 class Deposit(models.Model):

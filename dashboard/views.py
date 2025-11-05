@@ -51,24 +51,26 @@ def investments_view(request):
 
 @login_required
 def kyc_view(request):
-    profile = request.user.profile  # assuming a OneToOne relationship with User
+    profile = request.user.profile
+    kyc_instance = getattr(request.user, 'kyc', None)
 
     if request.method == 'POST':
-        form = KYCForm(request.POST, request.FILES)
+        form = KYCForm(request.POST, request.FILES, instance=kyc_instance)
         if form.is_valid():
             kyc = form.save(commit=False)
             kyc.user = request.user
+            kyc.status = 'pending'  # set to pending after submission
             kyc.save()
             profile.kyc_verified = False
             profile.save()
-            messages.success(request, "KYC submitted successfully! Awaiting verification.")
+            messages.success(request, "✅ KYC submitted successfully! Status: Pending Verification.")
             return redirect('dashboard:kyc')
         else:
-            messages.error(request, "Please correct the errors below.")
+            messages.error(request, "⚠ Please correct the errors below.")
     else:
-        form = KYCForm()
+        form = KYCForm(instance=kyc_instance)
 
-    return render(request, 'dashboard/kyc.html', {'form': form, 'profile': profile})
+    return render(request, 'dashboard/kyc.html', {'form': form, 'profile': profile, 'kyc': kyc_instance})
 
 
 @login_required

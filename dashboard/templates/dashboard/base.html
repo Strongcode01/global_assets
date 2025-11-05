@@ -6,6 +6,96 @@
     <title>{% block title %}Dashboard{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}">
     <style>
+
+      /*------------------------------------------------------
+      Loader Overlay
+    ------------------------------------------------------*/
+    #global-page-loader { 
+      display: none; 
+      position: fixed; 
+      inset: 0; 
+      z-index: 9999; 
+      align-items: center; 
+      justify-content: center; 
+      background: rgba(2, 0, 3, 0.877);
+    }
+    #global-page-loader.show { display: flex; }
+
+    .loader5 {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+
+    .loader5 span {
+      position: absolute;
+      border: 3px solid #aa90d3;
+      opacity: 1;
+      border-radius: 50%;
+      animation: loader5-animation 1.2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    }
+
+    .loader5 span:nth-child(2) { animation-delay: -0.5s; }
+
+    @keyframes loader5-animation {
+      0%, 4.9% { top: 36px; left: 36px; width: 0; height: 0; opacity: 0; }
+      5% { opacity: 1; }
+      100% { top: 0; left: 0; width: 72px; height: 72px; opacity: 0; }
+    }
+
+      /* Hamburger Button - hidden on desktop */
+      .hamburger {
+        display: none;
+        cursor: pointer;
+        font-size: 1.8rem;
+        background: none;
+        border: none;
+        color: var(--text);
+        position: fixed;
+        top: 15px;
+        left: 20px;
+        z-index: 1001;
+      }
+
+      /* Sidebar default (desktop) */
+      .sidebar {
+        background: var(--card-bg);
+        padding: 20px;
+        width: 250px;
+        height: 100vh;
+        border-right: 1px solid #ddd;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: static;
+        transition: transform 0.3s ease-in-out;
+      }
+
+      /* Mobile Styles */
+      @media (max-width: 768px) {
+        .hamburger {
+          display: block;
+        }
+
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          transform: translateX(-100%);
+          height: 100vh;
+          width: 230px;
+          z-index: 1000;
+        }
+
+        .sidebar.active {
+          transform: translateX(0);
+        }
+
+        .content {
+          margin-left: 0 !important;
+        }
+      }
+
       /* General Layout Enhancements */
       .crypto-widgets {
         margin: 20px 0;
@@ -61,17 +151,121 @@
         text-align: right;
         padding: 10px 20px;
         margin-bottom: 40px;
+        margin-left: 70%;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
 
-      
+      /* --- Base Sidebar Styling --- */
+      .sidebar {
+        background: var(--card-bg);
+        padding: 20px;
+        width: 250px;
+        height: 95%;
+        border-right: 1px solid #ddd;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: fixed;
+        top: 0;
+        left: 0;
+        transition: transform 0.3s ease;
+        z-index: 999;
+      }
+
+      .sidebar nav a {
+        display: block;
+        color: var(--text);
+        padding: 10px 0;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .sidebar nav a:hover {
+        color: var(--accent);
+      }
+
+      .brand {
+        font-size: 1.4rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+      }
+
+      #theme-toggle {
+        background: var(--accent);
+        border: none;
+        color: white;
+        padding: 8px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      /* --- Layout Adjustments --- */
+      .layout {
+        display: flex;
+      }
+
+      .content {
+        margin-left: 260px;
+        padding: 20px;
+        width: calc(100% - 260px);
+        transition: margin-left 0.3s ease;
+      }
+
+      /* --- Responsive Styling --- */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 220px;
+          height: 100vh;
+          transform: translateX(-100%);
+          position: fixed;
+        }
+
+        .sidebar.active {
+          transform: translateX(0);
+        }
+
+        .content {
+          margin-left: 0;
+          width: 100%;
+        }
+        
+
+        /* Add a hamburger button */
+        .menu-toggle {
+          position: fixed;
+          top: 15px;
+          left: 15px;
+          background: var(--accent);
+          color: #fff;
+          border: none;
+          padding: 10px 12px;
+          border-radius: 6px;
+          font-size: 18px;
+          z-index: 1000;
+          cursor: pointer;
+        }
+      }
+
+
     </style>
 </head>
 <body>
+    <!-- Spinner overlay -->
+    <div id="global-page-loader" aria-hidden="true">
+      <div class="loader5" role="status" aria-label="Loading">
+        <span></span><span></span>
+      </div>
+  </div>
     <div class="layout">
         <aside class="sidebar">
             <div class="brand">QFS Global</div>
             <nav>
+              <button id="hamburger" class="hamburger" aria-label="Menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+              </button>
                 <a href="{% url 'dashboard:dashboard' %}">🏠 Dashboard</a>
                 <a href="{% url 'dashboard:link_wallet' %}">🔗 Link Wallet</a>
                 <a href="{% url 'dashboard:transactions' %}">💳 Transactions</a>
@@ -160,7 +354,37 @@
       }
 
       toggle.addEventListener('click', updateWidgetTheme);
+
+
+      const hamburger = document.createElement('button');
+      hamburger.classList.add('hamburger');
+      hamburger.innerHTML = '☰'; // hamburger icon
+      document.body.prepend(hamburger);
+
+      const sidebar = document.querySelector('.sidebar');
+
+      hamburger.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        hamburger.textContent = sidebar.classList.contains('active') ? '✖' : '☰';
+      });
+
+      // Page loader script
+    (function () {
+      const loader = document.getElementById('global-page-loader');
+      const show = () => { loader.classList.add('show'); loader.setAttribute('aria-hidden', 'false'); };
+      const hide = () => { loader.classList.remove('show'); loader.setAttribute('aria-hidden', 'true'); };
+
+      document.addEventListener('click', e => {
+        const a = e.target.closest('a');
+        if (a && a.href && a.target !== '_blank' && !a.href.startsWith('#')) show();
+      }, true);
+
+      document.addEventListener('submit', () => show(), true);
+      window.addEventListener('pageshow', hide);
+      window.addEventListener('beforeunload', show);
+    })();
+
     </script>
 
 </body>
-</html>
+</html>  

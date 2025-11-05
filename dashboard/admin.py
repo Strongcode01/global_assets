@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Wallet, UserProfile, WalletName, Deposit
+from .models import Wallet, UserProfile, WalletName, Deposit, KYC
 
 
 @admin.register(WalletName)
@@ -26,3 +26,10 @@ class UserProfileAdmin(admin.ModelAdmin):
 @admin.register(Deposit)
 class DepositAdmin(admin.ModelAdmin):
     list_display = ('user', 'amount', 'status', 'date', 'reference')
+
+
+@admin.register(KYC)
+class KYCAdmin(admin.ModelAdmin):
+    list_display = ('user', 'status', 'submitted_at')
+    list_filter = ('status',)
+    search_fields = ('user__username', 'full_name', 'country')
