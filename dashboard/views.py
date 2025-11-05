@@ -51,27 +51,75 @@ def investments_view(request):
 
 @login_required
 def kyc_view(request):
-    profile = request.user.profile
-    kyc_instance = getattr(request.user, 'kyc', None)
+    # Ensure profile exists and avoid attribute errors
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
+    # Try to get existing KYC instance, None if not exists
+    try:
+        kyc_instance = request.user.kyc
+    except KYC.DoesNotExist:
+        kyc_instance = None
+
+    # Determine whether user requested to edit
+    want_edit = request.GET.get('edit') in ['1', 'true', 'True']  # e.g. ?edit=1
+
+    # If KYC exists and is verified, disallow editing
+    if kyc_instance and kyc_instance.status == 'verified':
+        want_edit = False  # force view-only for verified KYC
 
     if request.method == 'POST':
+        # If verified, prevent any updates
+        if kyc_instance and kyc_instance.status == 'verified':
+            messages.error(request, "Your KYC is already verified and cannot be edited.")
+            return redirect('dashboard:kyc')
+
+        # Bind form to instance if exists so we update instead of create duplicate
         form = KYCForm(request.POST, request.FILES, instance=kyc_instance)
         if form.is_valid():
-            kyc = form.save(commit=False)
-            kyc.user = request.user
-            kyc.status = 'pending'  # set to pending after submission
-            kyc.save()
-            profile.kyc_verified = False
-            profile.save()
-            messages.success(request, "✅ KYC submitted successfully! Status: Pending Verification.")
-            return redirect('dashboard:kyc')
+            try:
+                kyc = form.save(commit=False)
+                kyc.user = request.user
+                # When user submits or updates, mark as pending
+                kyc.status = 'pending'
+                kyc.save()
+                # ensure profile reflects pending (unverified)
+                profile.kyc_verified = False
+                profile.save()
+
+                messages.success(request, "✅ KYC submitted successfully. Status: Pending. The admin will review it.")
+                return redirect('dashboard:kyc')
+            except Exception as exc:
+                # Log error server-side; show user-friendly message
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.exception("KYC save failed for user %s: %s", request.user.username, exc)
+                messages.error(request, "An unexpected error occurred while submitting your KYC. Please try again.")
         else:
-            messages.error(request, "⚠ Please correct the errors below.")
+            messages.error(request, "Please correct the highlighted fields below.")
     else:
-        form = KYCForm(instance=kyc_instance)
+        # GET request: show form only if user asked to edit or no kyc exists yet
+        if want_edit or not kyc_instance:
+            form = KYCForm(instance=kyc_instance)
+        else:
+            form = None  # render the status-card, not the form
 
-    return render(request, 'dashboard/kyc.html', {'form': form, 'profile': profile, 'kyc': kyc_instance})
+    # Render page with profile, kyc instance (if any), and the form (or None)
+    return render(request, 'dashboard/kyc.html', {
+        'profile': profile,
+        'kyc': kyc_instance,
+        'form': form,
+    })
 
+@login_required
+def kyc_view_info(request):
+    # View-only page to display full KYC details (for verified KYC)
+    try:
+        kyc = request.user.kyc
+    except KYC.DoesNotExist:
+        messages.info(request, "No KYC found.")
+        return redirect('dashboard:kyc')
+
+    return render(request, 'dashboard/kyc_view_info.html', {'kyc': kyc})
 
 @login_required
 @transaction.atomic

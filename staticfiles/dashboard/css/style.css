@@ -43,109 +43,7 @@ body {
   min-height: 100vh;
 }
 
-/* --- Sidebar base (desktop-first) --- */
-.sidebar {
-  background: var(--card-bg);
-  padding: 20px;
-  width: 250px;
-  height: 100vh;
-  border-right: 1px solid var(--border-color, #ddd);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: fixed;
-  top: 0;
-  left: 0;
-  transition: transform 0.28s cubic-bezier(.2,.8,.2,1), box-shadow 0.2s;
-  z-index: 999;
-  /* desktop: visible by default, so no transform here */
-  transform: translateX(0);
-}
 
-/* Hide menu toggle by default (only show on mobile via media query) */
-.menu-toggle {
-  display: none;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 18px;
-  cursor: pointer;
-  z-index: 1001;
-}
-
-/* Content area (desktop) */
-.content {
-  margin-left: 260px;
-  padding: 20px;
-  width: calc(100% - 260px);
-  transition: margin-left 0.28s ease;
-}
-
-/* Overlay that appears when sidebar is open on mobile (initial hidden) */
-#sidebarOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  z-index: 998;
-  display: none;
-  transition: opacity 0.2s ease;
-  opacity: 0;
-}
-
-/* -----------------------------
-   Responsive behavior (mobile)
-   ----------------------------- */
-@media (max-width: 768px) {
-  /* Hide sidebar by default on mobile: slide it left */
-  .sidebar {
-    transform: translateX(-100%);
-    width: 80%;
-    max-width: 320px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-    /* keep it above overlay */
-    z-index: 1000;
-  }
-
-  /* When active, show sidebar on-screen */
-  .sidebar.active {
-    transform: translateX(0);
-  }
-
-  /* content full width on mobile */
-  .content {
-    margin-left: 0;
-    width: 100%;
-    padding: 18px;
-  }
-
-  /* show the hamburger only on mobile */
-  .menu-toggle {
-    display: inline-block;
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-size: 18px;
-    z-index: 1100;
-  }
-
-  /* overlay visible state (we toggle inline styles via JS, but CSS fallback) */
-  #sidebarOverlay.show {
-    display: block;
-    opacity: 1;
-  }
-}
-
-/* ensure on larger screens overlay remains hidden */
-@media (min-width: 769px) {
-  #sidebarOverlay { display: none !important; opacity: 0 !important; }
-}
 
 .cards-grid {
   display: grid;
@@ -322,7 +220,7 @@ footer {
 /* ===========================
    KYC Verification
 =========================== */
-.kyc-form {
+/* .kyc-form {
   max-width: 600px;
   margin: 40px auto;
   background: var(--card-bg);
@@ -370,7 +268,7 @@ footer {
 }
 .kyc-form button:hover {
   opacity: 0.9;
-}
+} */
 
 /* ===========================
    Investments Section
@@ -526,3 +424,5 @@ footer {
     padding: 10px;
   }
 }
+
+

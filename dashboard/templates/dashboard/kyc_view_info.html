@@ -1,0 +1,208 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}View KYC Information{% endblock %}
+
+{% block content %}
+<style>
+/* ===========================
+   VIEW KYC INFO — Modern Display Card
+   =========================== */
+.kyc-info-container {
+  max-width: 850px;
+  margin: 50px auto;
+  background: var(--card-bg, #fff);
+  border-radius: 18px;
+  padding: 40px 50px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.7s ease-in-out;
+}
+
+.kyc-info-container h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent-color, #3c40c6);
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.info-note {
+  text-align: center;
+  color: var(--text-muted, #555);
+  margin-bottom: 25px;
+}
+
+.kyc-info-card {
+  background: var(--inner-card, rgba(255, 255, 255, 0.9));
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.kyc-info-card:hover {
+  transform: translateY(-3px);
+}
+
+.kyc-info-card h3 {
+  margin-top: 15px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-strong, #222);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 18px;
+  margin: 15px 0;
+}
+
+.info-grid div {
+  background: var(--info-box-bg, #f8f9ff);
+  padding: 12px 15px;
+  border-radius: 8px;
+  border-left: 3px solid var(--accent-color, #3c40c6);
+}
+
+.info-grid strong {
+  display: block;
+  color: var(--accent-color, #3c40c6);
+  font-weight: 600;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-weight: 600;
+}
+
+.badge.verified { background: #4caf50; color: #fff; }
+.badge.pending { background: #ffc107; color: #222; }
+.badge.unverified { background: #f44336; color: #fff; }
+
+.docs-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.doc-item {
+  flex: 1 1 250px;
+  text-align: center;
+}
+
+.kyc-doc-img {
+  width: 100%;
+  max-width: 220px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.kyc-doc-img:hover {
+  transform: scale(1.05);
+}
+
+.btn-doc-link {
+  display: inline-block;
+  background: var(--accent-color, #3c40c6);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.25s ease;
+}
+
+.btn-doc-link:hover {
+  background: var(--accent-hover, #575fcf);
+}
+
+.btn-section {
+  text-align: center;
+  margin-top: 25px;
+}
+
+.btn-outline {
+  border: 2px solid var(--accent-color, #3c40c6);
+  padding: 10px 22px;
+  border-radius: 8px;
+  color: var(--accent-color, #3c40c6);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-outline:hover {
+  background: var(--accent-color, #3c40c6);
+  color: #fff;
+}
+
+/* DARK MODE FIXES */
+[data-theme="dark"] .kyc-info-container {
+  background: #1e1e2f;
+  color: #eaeaea;
+}
+
+[data-theme="dark"] .kyc-info-card {
+  background: #2b2b3d;
+  border: 1px solid #3a3a4a;
+}
+
+[data-theme="dark"] .info-grid div {
+  background: #303046;
+  border-left-color: #7073ff;
+}
+</style>
+
+<div class="kyc-info-container">
+  <h2>👁️ Verified KYC Information</h2>
+  <p class="info-note">
+    Below are your verified KYC details. These have been reviewed and approved by the admin.
+  </p>
+
+  <div class="kyc-info-card">
+    <h3>🪪 Personal Information</h3>
+    <div class="info-grid">
+      <div><strong>Full Name:</strong><p>{{ kyc.full_name }}</p></div>
+      <div><strong>Country:</strong><p>{{ kyc.country }}</p></div>
+      <div><strong>ID Type:</strong><p>{{ kyc.id_type }}</p></div>
+      <div><strong>ID Number:</strong><p>{{ kyc.id_number }}</p></div>
+    </div>
+
+    <h3>📅 Submission Details</h3>
+    <p><strong>Date Submitted:</strong> {{ kyc.submitted_at|date:"F j, Y, g:i a" }}</p>
+    <p><strong>Status:</strong>
+      {% if kyc.status == 'verified' %}
+        <span class="badge verified">✔ Verified</span>
+      {% elif kyc.status == 'pending' %}
+        <span class="badge pending">⏳ Pending</span>
+      {% else %}
+        <span class="badge unverified">❌ Unverified</span>
+      {% endif %}
+    </p>
+
+    <h3>📄 Uploaded Documents</h3>
+    <div class="docs-section">
+      {% if kyc.profile_pic %}
+      <div class="doc-item">
+        <p><strong>Profile Picture</strong></p>
+        <img src="{{ kyc.profile_pic.url }}" alt="Profile Picture" class="kyc-doc-img">
+      </div>
+      {% endif %}
+      {% if kyc.kyc_doc %}
+      <div class="doc-item">
+        <p><strong>ID Document</strong></p>
+        <a href="{{ kyc.kyc_doc.url }}" target="_blank" class="btn-doc-link">📄 View Uploaded ID Document</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="btn-section">
+      <a href="{% url 'dashboard:kyc' %}" class="btn-outline">← Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

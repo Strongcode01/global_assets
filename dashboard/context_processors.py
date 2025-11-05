@@ -11,3 +11,18 @@ def user_profile_context(request):
             pass
         return {'profile': profile, 'kyc': kyc}
     return {}
+
+from .models import KYC
+
+def user_profile_context(request):
+    if request.user.is_authenticated:
+        try:
+            kyc = KYC.objects.filter(user=request.user).first()
+        except KYC.DoesNotExist:
+            kyc = None
+        return {
+            "kyc": kyc,
+            "kyc_verified": kyc.status == "verified" if kyc else False,
+            "profile_pic_url": kyc.profile_pic.url if kyc and kyc.profile_pic else None,
+        }
+    return {}

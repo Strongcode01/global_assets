@@ -9,6 +9,7 @@ urlpatterns = [
     path('transactions/', views.transactions_view, name='transactions'),
     path('investments/', views.investments_view, name='investments'),
     path('kyc/', views.kyc_view, name='kyc'),
+    path('kyc/view/', views.kyc_view_info, name='kyc_view_info'),
     path("buy/", views.buy_view, name="buy"),
     path("deposit/", views.deposit_view, name="deposit"),
     path("withdraw/", views.withdraw_view, name="withdraw"),

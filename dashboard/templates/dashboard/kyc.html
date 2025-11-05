@@ -1,56 +1,301 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
+{% include 'dashboard/partials/kyc_status_card.html' %}
+
+{% block title %}KYC Verification{% endblock %}
 
 {% block content %}
+<style>
+/* --- KYC FORM PROFESSIONAL STYLING --- */
+.kyc-container {
+  max-width: 700px;
+  margin: 40px auto;
+  background: var(--card-bg, #fff);
+  border-radius: 20px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+  padding: 35px 40px;
+  transition: all 0.4s ease;
+}
+
+.kyc-container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+}
+
+/* Header */
+.kyc-header h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary, #636363);
+  text-align: center;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+/* Info text */
+.info-text {
+  text-align: center;
+  color: var(--text-secondary, #555);
+  margin-bottom: 25px;
+  font-size: 0.95rem;
+}
+
+/* GRID - 2 ITEMS PER ROW */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(270px, 1fr));
+  gap: 22px;
+  margin-bottom: 40px;
+  padding: 20px;
+}
+
+.form-grid div {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Labels */
+.form-grid label {
+  display: none;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--label-color, #222);
+  transition: color 0.3s ease;
+}
+
+/* Inputs & Selects */
+.form-grid input,
+.form-grid select,
+.upload-group input {
+  background: var(--input-bg, #f9f9fb);
+  border: 1.5px solid var(--input-border, #ccc);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  color: var(--text-primary, #333);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.upload-group input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 8px rgba(79, 70, 229, 0.25);
+  background: var(--input-focus-bg, #fff);
+}
+
+/* Upload groups */
+.upload-group {
+  margin-bottom: 25px;
+}
+
+.upload-group label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+  color: var(--label-color, #222);
+}
+
+.upload-group input[type="file"] {
+  border: 2px dashed var(--input-border, #bbb);
+  padding: 18px;
+  cursor: pointer;
+  border-radius: 12px;
+  background: var(--input-bg, #fafafa);
+  transition: all 0.3s ease;
+}
+
+.upload-group input[type="file"]:hover {
+  border-color: #4f46e5;
+  background: rgba(79, 70, 229, 0.04);
+}
+
+/* Submit Button */
+.btn-submit {
+  width: 100%;
+  background: linear-gradient(135deg, #4f46e5, #6d28d9);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 0;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+  transition: all 0.35s ease;
+}
+
+.btn-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+  background: linear-gradient(135deg, #6d28d9, #4f46e5);
+}
+
+/* Alerts */
+.alert {
+  margin-bottom: 15px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.alert-success {
+  background: #e6f7ec;
+  color: #1a7f37;
+  border: 1px solid #a6d6b8;
+}
+
+.alert-error {
+  background: #fdecea;
+  color: #b91c1c;
+  border: 1px solid #f5c2c2;
+}
+
+/* --- DARK MODE SUPPORT --- */
+@media (prefers-color-scheme: dark) {
+  .kyc-container {
+    background: #1f1f23;
+    color: #f1f1f1;
+  }
+
+  .form-grid label,
+  .upload-group label{
+    display: none;
+  }
+  .info-text {
+    color: #e0e0e0;
+  }
+
+  .form-grid input,
+  .form-grid select,
+  .upload-group input[type="file"] {
+    background: #2b2b31;
+    border-color: #3b3b45;
+    color: #f8f8f8;
+  }
+
+  .form-grid input:focus,
+  .form-grid select:focus {
+    border-color: #8b5cf6;
+    background: #1f1f23;
+  }
+
+  .btn-submit {
+    background: linear-gradient(135deg, #6d28d9, #4f46e5);
+    box-shadow: 0 4px 15px rgba(109, 40, 217, 0.4);
+  }
+
+  .btn-submit:hover {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  }
+}
+
+/* --- Animation for Form Entry --- */
+.kyc-form {
+  animation: fadeInUp 0.8s ease both;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========== DARK MODE FIXES =========== */
+[data-theme="dark"] .kyc-container {
+  background: #1e1e2f;
+  color: #e5e5e5;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .form-grid input,
+[data-theme="dark"] .form-grid select,
+[data-theme="dark"] .upload-group input {
+  background: #2b2b3d;
+  border-color: #3c3c4f;
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .form-grid label {
+  color: #e8e8e8;
+}
+
+[data-theme="dark"] .info-text {
+  background: rgba(90, 95, 230, 0.12);
+  border-left-color: #7073ff;
+}
+
+[data-theme="dark"] .btn-submit {
+  box-shadow: 0 5px 15px rgba(88, 90, 255, 0.3);
+}
+</style>
+
 <div class="kyc-container">
-    <h2>KYC Verification</h2>
-    <form method="post" enctype="multipart/form-data" class="kyc-form">
-        {% csrf_token %}
-        
-        <!-- Display non-field errors (like form validation issues) -->
-        {% if form.non_field_errors %}
-            <div class="form-errors">
-                {{ form.non_field_errors }}
-            </div>
-        {% endif %}
-        
-        <div class="form-group">
-            {{ form.full_name.label_tag }}
-            {{ form.full_name }}
-            {{ form.full_name.errors }}
-        </div>
+  <div class="kyc-header">
+    <h2>🪪 KYC Verification</h2>
+  </div>
 
-        <div class="form-group">
-            {{ form.country.label_tag }}
-            {{ form.country }}
-            {{ form.country.errors }}
-        </div>
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
 
-        <div class="form-group">
-            {{ form.id_type.label_tag }}
-            {{ form.id_type }}
-            {{ form.id_type.errors }}
-        </div>
+  {% if kyc and not form %}
+    {% include 'dashboard/partials/kyc_status_card.html' %}
+  {% else %}
+    <p class="info-text">
+      Complete and submit your KYC details. Once submitted, the admin will verify your information.
+    </p>
 
-        <div class="form-group">
-            {{ form.id_number.label_tag }}
-            {{ form.id_number }}
-            {{ form.id_number.errors }}
-        </div>
+    <form method="POST" enctype="multipart/form-data" class="kyc-form">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
 
-        <div class="form-group">
-            <label for="{{ form.kyc_doc.id_for_label }}">KYC Document</label>
-            {{ form.kyc_doc }}
-            {{ form.kyc_doc.errors }}
+      <div class="form-grid">
+        <div>
+          {{ form.full_name.label_tag }}
+          {{ form.full_name }}
+          {{ form.full_name.errors }}
         </div>
-
-        <div class="form-group">
-            <label for="{{ form.profile_pic.id_for_label }}">Profile Picture</label>
-            {{ form.profile_pic }}
-            {{ form.profile_pic.errors }}
+        <div>
+          {{ form.country.label_tag }}
+          {{ form.country }}
+          {{ form.country.errors }}
         </div>
+        <div>
+          {{ form.id_type.label_tag }}
+          {{ form.id_type }}
+          {{ form.id_type.errors }}
+        </div>
+        <div>
+          {{ form.id_number.label_tag }}
+          {{ form.id_number }}
+          {{ form.id_number.errors }}
+        </div>
+      </div>
 
-        <button type="submit" class="btn-submit">Submit KYC</button>
+      <div class="upload-group">
+        <label for="{{ form.kyc_doc.id_for_label }}">Upload ID Document</label>
+        {{ form.kyc_doc }}
+        {{ form.kyc_doc.errors }}
+      </div>
+
+      <div class="upload-group">
+        <label for="{{ form.profile_pic.id_for_label }}">Upload Profile Picture</label>
+        {{ form.profile_pic }}
+        {{ form.profile_pic.errors }}
+      </div>
+
+      <button type="submit" class="btn-submit">Submit KYC</button>
     </form>
+  {% endif %}
 </div>
 {% endblock %}
