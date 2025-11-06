@@ -11,9 +11,22 @@
     {{ form.as_p }}
     <button type="submit">Deposit</button>
   </form>
+  <script>
+    updateBalance();
+</script>
 </div>
 
 <style>
+  .amount.updated {
+  animation: flash 0.5s ease;
+}
+
+@keyframes flash {
+  0% { color: #007bff; }
+  50% { color: #28a745; }
+  100% { color: #007bff; }
+}
+
 .deposit-card {
   background: var(--card-bg);
   padding: 25px;
@@ -36,5 +49,10 @@
   background: var(--btn-hover-bg);
 }
 </style>
-
+<script>
+  const amountEl = document.querySelector('.amount');
+  amountEl.textContent = `$${data.balance.toFixed(2)}`;
+  amountEl.classList.add('updated');
+  setTimeout(() => amountEl.classList.remove('updated'), 500);
+</script>
 {% endblock %}

@@ -1,49 +1,165 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
+
 {% block title %}Dashboard{% endblock %}
-{% block extra_css %}
-    
-{% endblock %}
+
 {% block content %}
-
 <div class="dashboard-container">
-
-  <div class="cards-grid">
-    <div class="card balance">
-      <p>Total Balance</p>
-      <h2>$ {{ profile.total_balance }}</h2>
-      <p>
-        KYC:
-        {% if profile.kyc_verified %}
-        <span class="verified">✔ Verified</span>
-        {% else %}
-        <span class="unverified">✖ Pending</span>
-        {% endif %}
+  
+  <!-- Balance & KYC Section -->
+  <div class="dashboard-grid">
+    <div class="card balance-card">
+      <p class="label">Total Balance</p>
+      <h2 class="amount">${{ profile.total_balance|floatformat:2 }}</h2>
+      <p class="kyc-status">
+        KYC Status: 
+        <span class="{% if kyc and kyc.status == 'Verified' %}status-verified{% else %}status-pending{% endif %}">
+          {{ kyc.status|default:"Pending" }}
+        </span>
       </p>
     </div>
 
-    <div class="card wallets">
+    <!-- Linked Wallets -->
+    <div class="card wallets-card">
       <h3>Linked Wallets</h3>
       {% if wallets %}
-      <ul>
-        {% for wallet in wallets %}
-        <li>{{ wallet.wallet_name }}</li>
-        {% endfor %}
-      </ul>
+        <ul class="wallet-list">
+          {% for wallet in wallets %}
+            <li>{{ wallet.wallet_name }}</li>
+          {% endfor %}
+        </ul>
       {% else %}
-      <p>No wallets linked.</p>
+        <p class="empty-msg">No wallets linked yet.</p>
       {% endif %}
     </div>
 
-    <div class="card actions">
+    <!-- Quick Actions -->
+    <div class="card actions-card">
       <h3>Quick Actions</h3>
-      <div class="actions">
-        <a href="{% url 'dashboard:buy' %}"><button>Buy</button></a>
-        <a href="{% url 'dashboard:deposit' %}"><button>Deposit</button></a>
-        <a href="{% url 'dashboard:withdraw' %}"><button>Withdraw</button></a>
-        <a href="{% url 'dashboard:swap' %}"><button>Swap</button></a>
-        <a href="{% url 'dashboard:link_wallet' %}"><button style="display: none;">Link Wallet</button></a>
+      <div class="actions-grid">
+        <a href="{% url 'dashboard:buy' %}" class="btn-action">Buy</a>
+        <a href="{% url 'dashboard:deposit' %}" class="btn-action">Deposit</a>
+        <a href="{% url 'dashboard:withdraw' %}" class="btn-action">Withdraw</a>
+        <a href="{% url 'dashboard:swap' %}" class="btn-action">Swap</a>
+      </div>
     </div>
   </div>
 </div>
+
+<style>
+.dashboard-container {
+  min-height: 60vh;
+  padding: 2rem;
+  background: var(--page-bg, #f8f9fb);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--card-bg, #fff);
+  padding: 1.8rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.balance-card .label {
+  color: #888;
+  font-size: 14px;
+}
+
+.balance-card .amount {
+  font-size: 2.2rem;
+  color: var(--primary, #007bff);
+  margin: 8px 0;
+}
+
+.kyc-status {
+  font-size: 14px;
+  color: #666;
+}
+
+.status-verified {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.status-pending {
+  color: #ffc107;
+  font-weight: 600;
+}
+
+.wallets-card ul.wallet-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.wallets-card ul.wallet-list li {
+  background: var(--light-bg, #dadada);
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #1d1f20;
+}
+
+.wallets-card .empty-msg {
+  color: #777;
+  font-style: italic;
+}
+
+.actions-card .actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-action {
+  display: inline-block;
+  background: var(--btn-bg, #007bff);
+  color: #fff;
+  text-align: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s;
+  font-size: 14px;
+}
+
+.btn-action:hover {
+  background: var(--btn-hover-bg, #0056b3);
+}
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+  function updateBalance() {
+    fetch("{% url 'dashboard:get_balance' %}")
+      .then(response => response.json())
+      .then(data => {
+        document.querySelector('.amount').textContent = `$${data.balance.toFixed(2)}`;
+        const kycSpan = document.querySelector('.kyc-status span');
+        kycSpan.textContent = data.kyc_status;
+        if (data.kyc_status === 'Verified') {
+          kycSpan.className = 'status-verified';
+        } else {
+          kycSpan.className = 'status-pending';
+        }
+      })
+      .catch(err => console.error("Error updating balance:", err));
+  }
+
+  // Auto-refresh every 10 seconds
+  setInterval(updateBalance, 10000);
+});
+</script>
 {% endblock %}

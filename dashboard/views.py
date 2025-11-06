@@ -1,10 +1,10 @@
 # views.py
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 import uuid
-
 from .models import UserProfile, Wallet, Deposit, Buy, Withdraw, Swap, KYC
 from .forms import WalletForm, DepositForm, BuyForm, WithdrawForm, SwapForm, KYCForm
 
@@ -14,9 +14,11 @@ from .forms import WalletForm, DepositForm, BuyForm, WithdrawForm, SwapForm, KYC
 def dashboard_view(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     wallets = Wallet.objects.filter(user=request.user)
+    recent_transactions = Deposit.objects.filter(user=request.user).order_by('-date')[:5]
     return render(request, 'dashboard/index.html', {
         'profile': profile,
         'wallets': wallets,
+        'recent_transactions': recent_transactions,
     })
 
 
@@ -36,13 +38,6 @@ def link_wallet_view(request):
         form = WalletForm()
 
     return render(request, 'dashboard/link_wallet.html', {'form': form})
-
-
-@login_required
-def transactions_view(request):
-    transactions = []  # Replace with actual queryset later
-    return render(request, 'dashboard/transactions.html', {'transactions': transactions})
-
 
 @login_required
 def investments_view(request):
@@ -121,31 +116,49 @@ def kyc_view_info(request):
 
     return render(request, 'dashboard/kyc_view_info.html', {'kyc': kyc})
 
+
 @login_required
-@transaction.atomic
 def deposit_view(request):
-    profile = UserProfile.objects.select_for_update().get(user=request.user)
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
     if request.method == "POST":
         form = DepositForm(request.POST)
         if form.is_valid():
             deposit = form.save(commit=False)
             deposit.user = request.user
-            deposit.reference = str(uuid.uuid4())[:12]
-            deposit.status = "successful"  # for now simulate success
+            # keep status pending — admin must approve to credit balance
+            deposit.status = "pending"
+            # reference auto-generated in model.save()
             deposit.save()
-
-            # Update wallet balance
-            profile.total_balance += deposit.amount
-            profile.save()
-
-            messages.success(request, f"Deposit of ${deposit.amount} was successful!")
-            return redirect("dashboard:index")
+            messages.success(request, "✅ Deposit recorded — awaiting admin approval.")
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'balance': float(profile.total_balance)})
+            return redirect("dashboard:dashboard")
         else:
-            messages.error(request, "Invalid deposit amount.")
+            messages.error(request, "Please enter a valid deposit amount.")
     else:
         form = DepositForm()
 
     return render(request, "dashboard/deposit.html", {"form": form, "profile": profile})
+
+@login_required
+def get_balance(request):
+    """Return the current user's total balance and KYC status as JSON."""
+    profile = UserProfile.objects.get(user=request.user)
+    kyc = getattr(profile, 'kyc', None)
+    return JsonResponse({
+        'balance': float(profile.total_balance),
+        'kyc_status': kyc.status if kyc else 'Pending'
+    })
+
+@login_required
+def transactions_view(request):
+    deposits = Deposit.objects.filter(user=request.user).values(
+        'amount', 'status', 'date', 'reference'
+    )
+    transactions = [
+        {'type': 'deposit', **txn} for txn in deposits
+    ]
+    return render(request, 'dashboard/transactions.html', {'transactions': transactions})
 
 
 @login_required
@@ -190,6 +203,8 @@ def withdraw_view(request):
                 profile.total_balance -= withdraw.amount
                 profile.save()
                 messages.success(request, f"Withdrawal of ${withdraw.amount} successful!")
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'balance': float(profile.total_balance)})
             else:
                 messages.error(request, "Insufficient balance.")
             return redirect("dashboard:dashboard")

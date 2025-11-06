@@ -268,7 +268,7 @@
                     class="profile-avatar" loading="lazy" width="110" height="110">
               {% else %}
                 <img src="{% static 'dashboard/images/default-avatar.png' %}" 
-                    alt="Default avatar" class="profile-avatar" loading="lazy" width="110" height="110">
+                    alt="{{ profile.username }}" class="profile-avatar" loading="lazy" width="110" height="110">
               {% endif %}
 
               <!-- Welcome Message -->

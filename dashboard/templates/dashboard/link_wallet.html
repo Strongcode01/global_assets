@@ -5,6 +5,77 @@
 
 {% block extra_css %}
 <style>
+/* Error popup card */
+#errorPopup {
+  position: fixed;
+  left: 50%;
+  top: 16%;
+  transform: translateX(-50%) translateY(-10px);
+  min-width: 320px;
+  max-width: 680px;
+  z-index: 3000;
+  display: none;
+  opacity: 0;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+#errorPopup.show { display: block; opacity: 1; transform: translateX(-50%) translateY(0); }
+
+#errorPopup .card {
+  background: var(--card-bg);
+  color: var(--text);
+  border-radius: 12px;
+  box-shadow: 0 12px 36px rgba(2,6,23,0.14);
+  padding: 18px;
+  border: 1px solid var(--border-color);
+  position: relative;
+}
+
+/* Close button */
+#errorPopup .close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Title */
+#errorPopup h4 {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 1.05rem;
+}
+
+/* Message list */
+#errorPopup .messages {
+  margin-top: 6px;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+#errorPopup .messages p { margin: 6px 0; }
+
+/* small inline error highlight for the field */
+.field-errors { color: var(--danger); font-size: 0.95rem; margin-top: 6px; }
+
+/* small helper to dim page behind popup (optional) */
+#popup-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 2990;
+}
+#popup-backdrop.show { display:block; }
+
+@media (max-width: 480px) {
+  #errorPopup { left: 10px; right: 10px; transform: none; top: 8%; }
+  #errorPopup .card { padding: 14px; }
+}
+
+
 /* Wallet form styling - clean and responsive */
 .wallet-form-container {
   max-width: 720px;
@@ -128,6 +199,29 @@
 {% endblock %}
 
 {% block content %}
+<!-- Error popup and backdrop -->
+  <div id="popup-backdrop" aria-hidden="true"></div>
+  <div id="errorPopup" role="alertdialog" aria-live="assertive" aria-modal="true" aria-labelledby="errorPopupTitle">
+    <div class="card" role="document">
+      <button class="close-btn" aria-label="Close error" id="errorPopupClose">×</button>
+      <h4 id="errorPopupTitle">There was a problem</h4>
+      <div class="messages" id="errorPopupMessages">
+        {% comment %} JS will fill the messages from template content below {% endcomment %}
+        {% if form.non_field_errors %}
+          {% for err in form.non_field_errors %}
+            <p>{{ err }}</p>
+          {% endfor %}
+        {% endif %}
+        {% for field, errs in form.errors.items %}
+          {% for e in errs %}
+            <p><strong>{{ field|capfirst }}:</strong> {{ e }}</p>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!--  the form -->
 <div class="wallet-form-container" role="region" aria-labelledby="wallet-form-heading">
   <h2 id="wallet-form-heading">🔗 Link and Backup Your Wallet</h2>
 
@@ -209,6 +303,39 @@
       hint.setAttribute('aria-live', 'assertive');
     }
   });
+})();
+
+(function(){
+  // Helper to show popup if errors exist
+  const popup = document.getElementById('errorPopup');
+  const backdrop = document.getElementById('popup-backdrop');
+  const closeBtn = document.getElementById('errorPopupClose');
+
+  function showPopup() {
+    popup.classList.add('show');
+    backdrop.classList.add('show');
+    popup.setAttribute('aria-hidden', 'false');
+    backdrop.setAttribute('aria-hidden', 'false');
+  }
+  function hidePopup() {
+    popup.classList.remove('show');
+    backdrop.classList.remove('show');
+    popup.setAttribute('aria-hidden', 'true');
+    backdrop.setAttribute('aria-hidden', 'true');
+  }
+  closeBtn.addEventListener('click', hidePopup);
+  backdrop.addEventListener('click', hidePopup);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') hidePopup();
+  });
+
+  // If the server produced any form errors, open popup automatically
+  // We inspect the messages container - if it contains children, open.
+  const messagesContainer = document.getElementById('errorPopupMessages');
+  if (messagesContainer && messagesContainer.children.length > 0) {
+    // Small timeout to allow CSS paint, then show
+    setTimeout(showPopup, 5);
+  }
 })();
 </script>
 {% endblock %}

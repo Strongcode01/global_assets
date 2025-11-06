@@ -1,6 +1,9 @@
 from django.utils import timezone
 from django.contrib import admin
 from .models import Wallet, UserProfile, WalletName, Deposit, KYC
+from django.db import transaction
+from django.db.models import F
+from django.contrib import messages
 
 
 @admin.register(WalletName)
@@ -24,10 +27,36 @@ class UserProfileAdmin(admin.ModelAdmin):
     search_fields = ('user__username',)
     ordering = ('user',)
 
+
 @admin.register(Deposit)
 class DepositAdmin(admin.ModelAdmin):
-    list_display = ('user', 'amount', 'status', 'date', 'reference')
+    list_display = ('user', 'amount', 'status', 'date', 'reference', 'applied')
+    list_filter = ('status', 'date')
+    search_fields = ('user__username', 'reference')
+    actions = ['approve_deposits', 'mark_failed']
 
+    @admin.action(description="Mark selected deposits as successful (approve)")
+    def approve_deposits(self, request, queryset):
+        approved = 0
+        with transaction.atomic():
+            # process one-by-one to ensure profile locking per user
+            for deposit in queryset.select_for_update():
+                if deposit.status == 'successful' and deposit.applied:
+                    # already applied, skip
+                    continue
+                if deposit.status != 'successful':
+                    deposit.status = 'successful'
+                # Save deposit first so post_save signal will run and apply to profile
+                deposit.save()
+                # after save, the post_save handler will apply the deposit (if not applied)
+                approved += 1
+        self.message_user(request, f"{approved} deposit(s) marked successful and applied to user balances.")
+
+    @admin.action(description="Mark selected deposits as failed")
+    def mark_failed(self, request, queryset):
+        failed = queryset.exclude(status='failed').update(status='failed')
+        # do not subtract applied amounts — we assume only pending deposits should be marked failed
+        self.message_user(request, f"{failed} deposit(s) marked failed.")
 
 
 @admin.action(description="Mark selected KYC as Verified ✅")
