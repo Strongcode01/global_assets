@@ -14,7 +14,7 @@
       <p class="kyc-status">
         KYC Status: 
         <span class="{% if kyc and kyc.status == 'Verified' %}status-verified{% else %}status-pending{% endif %}">
-          {{ kyc.status|default:"Pending" }}
+          {{ kyc.status|default:"Not Verified" }}
         </span>
       </p>
     </div>
@@ -35,7 +35,7 @@
 
     <!-- Quick Actions -->
     <div class="card actions-card">
-      <h3>Quick Actions</h3>
+      <h3>Wallet Actions</h3>
       <div class="actions-grid">
         <!-- <a href="#" class="btn-action">Buy</a> -->
         <a href="{% url 'dashboard:deposit' %}" class="btn-action">Deposit</a>

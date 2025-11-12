@@ -274,20 +274,17 @@
               {% endif %}
 
               <!-- Welcome Message -->
-              {% if kyc and kyc.status == "verified" %}
+              {% if kyc.status == "verified" %}
                 <h2 class="welcome-title">
                   Welcome, {{ request.user.username|default:"User" }}
-                  <small class="kyc-status-text verified"> ✔ </small>
                 </h2>
-              {% elif kyc and kyc.status == "pending" %}
+              {% elif kyc.status == "pending" %}
                 <h2 class="welcome-title">
                   Hi, {{ request.user.username|default:"User" }}
-                  <small class="kyc-status-text pending" style="color: orangered;">  ✖  </small>
                 </h2>
               {% else %}
                 <h2 class="welcome-title">
                   Hi, {{ request.user.username|default:"User" }}
-                  <small class="kyc-status-text unverified"> ✖ </small>
                 </h2>
               {% endif %}
 

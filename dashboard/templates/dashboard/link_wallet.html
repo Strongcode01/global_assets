@@ -203,8 +203,6 @@
   <div id="popup-backdrop" aria-hidden="true"></div>
   <div id="errorPopup" role="alertdialog" aria-live="assertive" aria-modal="true" aria-labelledby="errorPopupTitle">
     <div class="card" role="document">
-      <button class="close-btn" aria-label="Close error" id="errorPopupClose">×</button>
-      <h4 id="errorPopupTitle">There was a problem</h4>
       <div class="messages" id="errorPopupMessages">
         {% comment %} JS will fill the messages from template content below {% endcomment %}
         {% if form.non_field_errors %}
@@ -254,88 +252,82 @@
 </div>
 
 <script>
-/* Client-side helper: live word count and simple prevention when not 12 words.
-   Server-side validation remains authoritative.
-*/
-(function(){
+/* ========================================================
+   ✅ Wallet Phrase Validator & Word Counter
+   ======================================================== */
+document.addEventListener('DOMContentLoaded', () => {
   const textarea = document.querySelector('textarea[name="wallet_phrase"]');
   const btn = document.getElementById('linkWalletBtn');
   const counter = document.getElementById('wordCount');
-  const hint = document.getElementById('phraseHint');
+  const form = document.querySelector('.wallet-form');
 
-  if (!textarea) return;
+  if (!textarea || !btn || !counter || !form) return;
 
-  function countWords(text) {
-    // Trim and split on any whitespace
-    const tokens = text.trim().split(/\s+/).filter(Boolean);
-    return tokens.length;
-  }
+  const countWords = (text) => text.trim().split(/\s+/).filter(Boolean).length;
 
-  function update() {
-    const val = textarea.value || '';
-    const n = countWords(val);
-    counter.textContent = `Phrase count: ${n}`;
-    if (n === 12) {
-      counter.classList.remove('invalid');
-      counter.classList.add('valid');
-      btn.disabled = false;
-    } else {
-      counter.classList.remove('valid');
-      counter.classList.add('invalid');
-      btn.disabled = true;
-    }
-  }
+  const updateCounter = () => {
+    const words = countWords(textarea.value);
+    counter.textContent = `Phrase count: ${words}`;
 
-  // Initialize on load
-  update();
+    const valid = words === 12;
+    counter.classList.toggle('valid', valid);
+    counter.classList.toggle('invalid', !valid);
+    btn.disabled = !valid;
+  };
 
-  // Live update
-  textarea.addEventListener('input', update);
+  // Run once and then on every input
+  updateCounter();
+  textarea.addEventListener('input', updateCounter);
 
-  // Extra: prevent accidental submit when JS thinks count != 12
-  document.querySelector('.wallet-form').addEventListener('submit', function (e) {
-    const n = countWords(textarea.value || '');
-    if (n !== 12) {
+  // Prevent accidental submission if phrase count ≠ 12
+  form.addEventListener('submit', (e) => {
+    if (countWords(textarea.value) !== 12) {
       e.preventDefault();
       textarea.focus();
-      update();
-      // Announce to screen readers
-      hint.setAttribute('aria-live', 'assertive');
+      updateCounter();
+      showPopup("Your recovery phrase must contain exactly 12 words.");
     }
   });
-})();
+});
 
-(function(){
-  // Helper to show popup if errors exist
+/* ========================================================
+   ✅ Error Popup Handling
+   ======================================================== */
+document.addEventListener('DOMContentLoaded', () => {
   const popup = document.getElementById('errorPopup');
   const backdrop = document.getElementById('popup-backdrop');
   const closeBtn = document.getElementById('errorPopupClose');
+  const messagesContainer = document.getElementById('errorPopupMessages');
 
-  function showPopup() {
+  if (!popup || !backdrop || !closeBtn) return;
+
+  // Centralized popup functions (reusable)
+  window.showPopup = (message = null) => {
+    if (message && messagesContainer) {
+      messagesContainer.innerHTML = `<p>${message}</p>`;
+    }
     popup.classList.add('show');
     backdrop.classList.add('show');
     popup.setAttribute('aria-hidden', 'false');
     backdrop.setAttribute('aria-hidden', 'false');
-  }
-  function hidePopup() {
+  };
+
+  window.hidePopup = () => {
     popup.classList.remove('show');
     backdrop.classList.remove('show');
     popup.setAttribute('aria-hidden', 'true');
     backdrop.setAttribute('aria-hidden', 'true');
-  }
+  };
+
   closeBtn.addEventListener('click', hidePopup);
   backdrop.addEventListener('click', hidePopup);
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape') hidePopup();
-  });
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && hidePopup());
 
-  // If the server produced any form errors, open popup automatically
-  // We inspect the messages container - if it contains children, open.
-  const messagesContainer = document.getElementById('errorPopupMessages');
+  // Auto-show popup if Django form errors exist
   if (messagesContainer && messagesContainer.children.length > 0) {
-    // Small timeout to allow CSS paint, then show
-    setTimeout(showPopup, 5);
+    setTimeout(showPopup, 120);
   }
-})();
+});
 </script>
+
 {% endblock %}
