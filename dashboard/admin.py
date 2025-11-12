@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.contrib import admin
-from .models import Wallet, UserProfile, WalletName, Deposit, KYC
+from .models import Wallet, UserProfile, WalletName, Deposit, KYC, Withdraw
 from django.db import transaction
 from django.db.models import F
 from django.contrib import messages
@@ -85,3 +85,52 @@ class KYCAdmin(admin.ModelAdmin):
     list_filter = ('status', 'country')
     search_fields = ('user__username', 'full_name', 'id_number')
     actions = [mark_as_verified, mark_as_pending]
+
+
+@admin.register(Withdraw)
+class WithdrawAdmin(admin.ModelAdmin):
+    list_display = ('user', 'amount', 'status', 'date', 'reference')
+    list_filter = ('status', 'date')
+    search_fields = ('user__username', 'reference')
+    actions = ['approve_withdrawals', 'mark_failed']
+
+    @admin.action(description="Approve selected withdrawals (mark as successful and apply)")
+    def approve_withdrawals(self, request, queryset):
+        applied_count = 0
+        failed_count = 0
+
+        with transaction.atomic():
+            for withdraw in queryset.select_for_update():
+                if withdraw.status == 'successful':
+                    continue
+
+                profile_qs = UserProfile.objects.select_for_update().filter(user=withdraw.user)
+                if not profile_qs.exists():
+                    withdraw.status = 'failed'
+                    withdraw.save()
+                    failed_count += 1
+                    continue
+
+                profile = profile_qs.first()
+                profile.refresh_from_db()
+
+                if profile.total_balance < withdraw.amount:
+                    withdraw.status = 'failed'
+                    withdraw.save()
+                    failed_count += 1
+                    continue
+
+                withdraw.status = 'successful'
+                withdraw.save()
+                applied_count += 1
+
+        self.message_user(
+            request,
+            f"{applied_count} withdrawal(s) approved; {failed_count} failed due to insufficient funds.",
+            level=messages.INFO
+        )
+
+    @admin.action(description="Mark selected withdrawals as failed")
+    def mark_failed(self, request, queryset):
+        updated = queryset.exclude(status='failed').update(status='failed')
+        self.message_user(request, f"{updated} withdrawal(s) marked failed.")

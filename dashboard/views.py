@@ -3,11 +3,13 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.db import transaction, models
 import uuid
-from .models import UserProfile, Wallet, Deposit, Buy, Withdraw, Swap, KYC
+from .models import User, UserProfile, Wallet, Deposit, Buy, Withdraw, Swap, KYC
 from .forms import WalletForm, DepositForm, BuyForm, WithdrawForm, SwapForm, KYCForm
-
+from django.db.models import F
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 @login_required
@@ -74,11 +76,16 @@ def kyc_view(request):
             try:
                 kyc = form.save(commit=False)
                 kyc.user = request.user
-                # When user submits or updates, mark as pending
-                kyc.status = 'pending'
+
+                # Only set to pending if it's a new submission or unverified
+                if not kyc_instance or kyc_instance.status != 'verified':
+                    kyc.status = 'pending'
+                    profile.kyc_verified = False
+                else:
+                    # If it's already verified, keep status and profile untouched
+                    kyc.status = kyc_instance.status
+
                 kyc.save()
-                # ensure profile reflects pending (unverified)
-                profile.kyc_verified = False
                 profile.save()
 
                 messages.success(request, "✅ KYC submitted successfully. Status: Pending. The admin will review it.")
@@ -125,11 +132,11 @@ def deposit_view(request):
         if form.is_valid():
             deposit = form.save(commit=False)
             deposit.user = request.user
-            # keep status pending — admin must approve to credit balance
-            deposit.status = "pending"
-            # reference auto-generated in model.save()
+            deposit.status = "pending"  # admin must approve
             deposit.save()
             messages.success(request, "✅ Deposit recorded — awaiting admin approval.")
+            # return fresh balance (unchanged until admin approves)
+            profile.refresh_from_db()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'balance': float(profile.total_balance)})
             return redirect("dashboard:dashboard")
@@ -137,17 +144,45 @@ def deposit_view(request):
             messages.error(request, "Please enter a valid deposit amount.")
     else:
         form = DepositForm()
-
     return render(request, "dashboard/deposit.html", {"form": form, "profile": profile})
+
+
+@login_required
+def withdraw_view(request):
+    """
+    Create a withdrawal request in 'pending' state. Admin must approve to actually deduct.
+    This prevents users from deducting their own balance while admin is the actor.
+    """
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    if request.method == "POST":
+        form = WithdrawForm(request.POST)
+        if form.is_valid():
+            withdraw = form.save(commit=False)
+            withdraw.user = request.user
+            withdraw.status = "pending"  # admin will approve
+            withdraw.save()
+            messages.success(request, "Withdrawal request submitted — awaiting admin approval.")
+            # return current balance (unchanged until admin approves)
+            profile.refresh_from_db()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'balance': float(profile.total_balance)})
+            return redirect("dashboard:dashboard")
+        else:
+            messages.error(request, "Please correct the errors.")
+    else:
+        form = WithdrawForm()
+    return render(request, "dashboard/withdraw.html", {"form": form, "profile": profile})
+   
 
 @login_required
 def get_balance(request):
-    """Return the current user's total balance and KYC status as JSON."""
-    profile = UserProfile.objects.get(user=request.user)
-    kyc = getattr(profile, 'kyc', None)
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    # ensure fresh value after any F() updates
+    profile.refresh_from_db()
+    kyc_status = getattr(getattr(request.user, 'kyc', None), 'status', 'Pending')
     return JsonResponse({
         'balance': float(profile.total_balance),
-        'kyc_status': kyc.status if kyc else 'Pending'
+        'kyc_status': kyc_status.capitalize(),
     })
 
 @login_required
@@ -187,30 +222,43 @@ def buy_view(request):
     return render(request, "dashboard/buy.html", {"form": form, "profile": profile})
 
 
-@login_required
-@transaction.atomic
-def withdraw_view(request):
-    profile = UserProfile.objects.select_for_update().get(user=request.user)
-    if request.method == "POST":
-        form = WithdrawForm(request.POST)
-        if form.is_valid():
-            withdraw = form.save(commit=False)
-            withdraw.user = request.user
-            withdraw.reference = str(uuid.uuid4())[:12]
-            if profile.total_balance >= withdraw.amount:
-                withdraw.status = "successful"
-                withdraw.save()
-                profile.total_balance -= withdraw.amount
-                profile.save()
-                messages.success(request, f"Withdrawal of ${withdraw.amount} successful!")
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return JsonResponse({'balance': float(profile.total_balance)})
-            else:
-                messages.error(request, "Insufficient balance.")
-            return redirect("dashboard:dashboard")
-    else:
-        form = WithdrawForm()
-    return render(request, "dashboard/withdraw.html", {"form": form, "profile": profile})
+
+@receiver(post_save, sender=Withdraw)
+def apply_withdraw_balance(sender, instance: Withdraw, created, **kwargs):
+    """
+    When a Withdraw becomes 'successful' and hasn't been applied yet,
+    atomically decrement the user's profile.total_balance and mark withdraw.applied=True.
+    If the user does not have enough balance at the moment of approval, mark as failed.
+    """
+    # Only proceed for successful and not applied withdraws
+    if instance.status != 'successful' or instance.applied:
+        return
+
+    # Atomic apply to avoid race conditions
+    from django.db import transaction
+    with transaction.atomic():
+        try:
+            profile = UserProfile.objects.select_for_update().get(user=instance.user)
+        except UserProfile.DoesNotExist:
+            # no profile - can't withdraw
+            # mark withdraw as failed
+            Withdraw.objects.filter(pk=instance.pk).update(status='failed', applied=False)
+            return
+
+        # ensure enough balance
+        # We read current balance fresh and compare
+        profile.refresh_from_db()
+        if profile.total_balance < instance.amount:
+            # insufficient funds - reverse the approval
+            Withdraw.objects.filter(pk=instance.pk).update(status='failed', applied=False)
+            return
+
+        # Deduct using F to be safe
+        profile.total_balance = F('total_balance') - instance.amount
+        profile.save()
+
+        # mark withdraw as applied; use update() to avoid re-triggering handler
+        Withdraw.objects.filter(pk=instance.pk, applied=False).update(applied=True)
 
 
 @login_required

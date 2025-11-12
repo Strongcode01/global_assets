@@ -86,6 +86,7 @@
       border-radius: 6px;
       cursor: pointer;
       width: 100%;
+      padding-bottom: 2rem;
     }
 
     /* ===============================================
@@ -247,13 +248,13 @@
                 <span class="bar"></span>
                 <span class="bar"></span>
               </button>
-                <a href="{% url 'dashboard:dashboard' %}">🏠 Dashboard</a>
-                <a href="{% url 'dashboard:link_wallet' %}">🔗 Link Wallet</a>
-                <a href="{% url 'dashboard:transactions' %}">💳 Transactions</a>
-                <a href="{% url 'dashboard:investments' %}">📈 Investments</a>
+                <a href="{% url 'dashboard:dashboard' %}">🏠  Dashboard</a>
+                <a href="{% url 'dashboard:link_wallet' %}">🔗  Link Wallet</a>
+                <a href="{% url 'dashboard:transactions' %}">💳  Transactions</a>
+                <!-- <a href="{% url 'dashboard:investments' %}">📈 Investments</a> -->
                 <a href="{% url 'dashboard:kyc' %}">🪪 KYC</a>
-                <a href="{% url 'core:home' %}">🏠 Home</a>
-                <a href="{% url 'core:logout' %}">🚪 Logout</a>
+                <a href="{% url 'core:home' %}">🏠  Home</a>
+                <a href="{% url 'core:logout' %}">🚪  Logout</a>
             </nav>
             <button id="theme-toggle">🌓 Theme - Dark / Light </button>
         </aside>

@@ -185,7 +185,48 @@ class Withdraw(models.Model):
 
     def __str__(self):
         return f"Withdraw {self.amount} by {self.user.username}"
+    
 
+@transaction.atomic
+class Withdraw(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    account_number = models.CharField(max_length=30)
+    bank_name = models.CharField(max_length=100)
+    date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[('pending', 'Pending'), ('successful', 'Successful'), ('failed', 'Failed')],
+        default='pending'
+    )
+    reference = models.CharField(max_length=100, unique=True)
+    # ensure we only deduct once
+    applied = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Withdraw {self.amount} by {self.user.username}"
+
+    def save(self, *args, **kwargs):
+        # Generate reference if not set
+        if not self.reference:
+            self.reference = uuid.uuid4().hex[:12]
+            while Withdraw.objects.filter(reference=self.reference).exists():
+                self.reference = uuid.uuid4().hex[:12]
+
+        # Save the withdraw object first
+        super().save(*args, **kwargs)
+
+        # Automatically update balance if withdrawal is approved/successful and not already applied
+        if self.status in ['successful', 'approved'] and not self.applied:
+            from dashboard.models import Profile  # Import Profile model here
+
+            profile = Profile.objects.filter(user=self.user).first()
+            if profile:
+                profile.total_balance -= self.amount
+                profile.save()
+                self.applied = True
+                # Save again to mark applied without recursion issues
+                super().save(update_fields=['applied'])
 
 class Swap(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

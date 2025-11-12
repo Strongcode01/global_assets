@@ -1,11 +1,106 @@
 {% extends 'dashboard/base.html' %}
-{% block title %}Withdraw{% endblock %}
 {% block content %}
-<div class="form-card">
+<div class="withdraw-card">
   <h2>Withdraw Funds</h2>
-  <p>Balance: ${{ profile.total_balance }}</p>
-  <form method="POST">{% csrf_token %}{{ form.as_p }}
-    <button type="submit">Withdraw</button>
+  <p class="balance-text">Current Balance: <strong id="balance-amount">${{ profile.total_balance }}</strong></p>
+
+  <form method="POST" class="withdraw-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="withdraw-btn">Request Withdrawal</button>
   </form>
 </div>
+
+<style>
+  /* === Withdraw Card Styling === */
+  .withdraw-card {
+    background: var(--card-bg, #fff);
+    padding: 30px 25px;
+    border-radius: 14px;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+    max-width: 480px;
+    margin: 40px auto;
+    text-align: center;
+    transition: 0.3s ease-in-out;
+  }
+
+  .withdraw-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+
+  .withdraw-card h2 {
+    margin-bottom: 10px;
+    font-size: 1.7rem;
+    color: var(--text-primary, #222);
+  }
+
+  .balance-text {
+    margin-bottom: 20px;
+    color: var(--text-muted, #555);
+  }
+
+  .withdraw-form p {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+
+  .withdraw-form input,
+  .withdraw-form select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: var(--input-bg, #fafafa);
+    transition: border 0.2s;
+  }
+
+  .withdraw-form input:focus,
+  .withdraw-form select:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+
+  .withdraw-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #007bff, #00b8d9);
+    color: #fff;
+    padding: 12px 0;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .withdraw-btn:hover {
+    background: linear-gradient(135deg, #0062cc, #0097a7);
+  }
+
+  @media (max-width: 500px) {
+    .withdraw-card {
+      margin: 25px 15px;
+      padding: 20px;
+    }
+  }
+</style>
+
+<script>
+  async function updateBalanceOnPage() {
+    try {
+      const res = await fetch("{% url 'dashboard:get_balance' %}", {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const el = document.getElementById('balance-amount');
+      if (!el) return;
+      el.textContent = `$${Number(data.balance).toFixed(2)}`;
+    } catch (err) {
+      console.error('Balance update failed:', err);
+    }
+  }
+  updateBalanceOnPage();
+</script>
 {% endblock %}

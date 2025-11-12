@@ -1,58 +1,120 @@
 {% extends 'dashboard/base.html' %}
-{% block title %}Deposit{% endblock %}
 {% block content %}
-
 <div class="deposit-card">
   <h2>Deposit Funds</h2>
-  <p>Your current balance: <strong>${{ profile.total_balance }}</strong></p>
+  <p class="balance-text">Your Current Balance: <strong id="balance-amount">${{ profile.total_balance }}</strong></p>
 
   <form method="POST" class="deposit-form">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Deposit</button>
+    <button type="submit" class="deposit-btn">Deposit</button>
   </form>
-  <script>
-    updateBalance();
-</script>
 </div>
 
 <style>
+  /* === Deposit Card Styling === */
+  .deposit-card {
+    background: var(--card-bg, #fff);
+    padding: 30px 25px;
+    border-radius: 14px;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+    max-width: 480px;
+    margin: 40px auto;
+    text-align: center;
+    transition: 0.3s ease-in-out;
+  }
+
+  .deposit-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+
+  .deposit-card h2 {
+    margin-bottom: 10px;
+    font-size: 1.7rem;
+    color: var(--text-primary, #222);
+  }
+
+  .balance-text {
+    margin-bottom: 20px;
+    color: var(--text-muted, #555);
+  }
+
+  .deposit-form p {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+
+  .deposit-form input,
+  .deposit-form select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: var(--input-bg, #fafafa);
+    transition: border 0.2s;
+  }
+
+  .deposit-form input:focus,
+  .deposit-form select:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+
+  .deposit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: #fff;
+    padding: 12px 0;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .deposit-btn:hover {
+    background: linear-gradient(135deg, #218838, #17a589);
+  }
+
+  /* Flash animation when balance updates */
   .amount.updated {
-  animation: flash 0.5s ease;
-}
+    animation: flash 0.5s ease;
+  }
+  @keyframes flash {
+    0% { color: #28a745; }
+    50% { color: #20c997; }
+    100% { color: #28a745; }
+  }
 
-@keyframes flash {
-  0% { color: #007bff; }
-  50% { color: #28a745; }
-  100% { color: #007bff; }
-}
-
-.deposit-card {
-  background: var(--card-bg);
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  max-width: 450px;
-  margin: 30px auto;
-  text-align: center;
-}
-.deposit-form button {
-  background: var(--btn-bg);
-  color: var(--btn-text);
-  padding: 10px 18px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.deposit-form button:hover {
-  background: var(--btn-hover-bg);
-}
+  @media (max-width: 500px) {
+    .deposit-card {
+      margin: 25px 15px;
+      padding: 20px;
+    }
+  }
 </style>
+
 <script>
-  const amountEl = document.querySelector('.amount');
-  amountEl.textContent = `$${data.balance.toFixed(2)}`;
-  amountEl.classList.add('updated');
-  setTimeout(() => amountEl.classList.remove('updated'), 500);
+  async function updateBalanceOnPage() {
+    try {
+      const res = await fetch("{% url 'dashboard:get_balance' %}", {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const el = document.getElementById('balance-amount');
+      if (!el) return;
+      el.textContent = `$${Number(data.balance).toFixed(2)}`;
+      el.classList.add('updated');
+      setTimeout(() => el.classList.remove('updated'), 600);
+    } catch (err) {
+      console.error('Could not update balance', err);
+    }
+  }
+
+  // update on page load
+  updateBalanceOnPage();
 </script>
 {% endblock %}
