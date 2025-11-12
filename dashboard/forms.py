@@ -18,7 +18,7 @@ class WalletForm(forms.ModelForm):
             'wallet_phrase': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter your 12-word recovery phrase. Separate words with spaces.',
-                'rows': 3,
+                'rows': 5,
                 'aria-label': 'Wallet recovery phrase'
             }),
         }
