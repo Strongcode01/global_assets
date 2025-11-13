@@ -104,24 +104,21 @@ class WithdrawAdmin(admin.ModelAdmin):
                 if withdraw.status == 'successful':
                     continue
 
-                profile_qs = UserProfile.objects.select_for_update().filter(user=withdraw.user)
-                if not profile_qs.exists():
+                profile = UserProfile.objects.select_for_update().filter(user=withdraw.user).first()
+                if not profile:
                     withdraw.status = 'failed'
-                    withdraw.save()
+                    withdraw.save(update_fields=['status'])
                     failed_count += 1
                     continue
 
-                profile = profile_qs.first()
-                profile.refresh_from_db()
-
                 if profile.total_balance < withdraw.amount:
                     withdraw.status = 'failed'
-                    withdraw.save()
+                    withdraw.save(update_fields=['status'])
                     failed_count += 1
                     continue
 
                 withdraw.status = 'successful'
-                withdraw.save()
+                withdraw.save()  # triggers balance deduction
                 applied_count += 1
 
         self.message_user(
@@ -132,5 +129,5 @@ class WithdrawAdmin(admin.ModelAdmin):
 
     @admin.action(description="Mark selected withdrawals as failed")
     def mark_failed(self, request, queryset):
-        updated = queryset.exclude(status='failed').update(status='failed')
-        self.message_user(request, f"{updated} withdrawal(s) marked failed.")
+        updated = queryset.update(status='failed')
+        self.message_user(request, f"{updated} withdrawal(s) marked as failed.", level=messages.WARNING)

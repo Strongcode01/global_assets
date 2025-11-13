@@ -10,19 +10,36 @@ from .forms import WalletForm, DepositForm, BuyForm, WithdrawForm, SwapForm, KYC
 from django.db.models import F
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from itertools import chain
+from django.db.models import Value, CharField
+
 
 
 @login_required
 def dashboard_view(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     wallets = Wallet.objects.filter(user=request.user)
-    recent_transactions = Deposit.objects.filter(user=request.user).order_by('-date')[:5]
-    return render(request, 'dashboard/index.html', {
+
+    deposits = Deposit.objects.filter(user=request.user).annotate(
+        type=Value('Deposit', output_field=CharField())
+    )
+    withdrawals = Withdraw.objects.filter(user=request.user).annotate(
+        type=Value('Withdrawal', output_field=CharField())
+    )
+
+    # Combine and sort
+    transactions = sorted(
+        chain(deposits, withdrawals),
+        key=lambda x: x.date,
+        reverse=True
+    )
+
+    context = {
         'profile': profile,
         'wallets': wallets,
-        'recent_transactions': recent_transactions,
-    })
-
+        'transactions': transactions[:10],
+    }
+    return render(request, 'dashboard/index.html', context)
 
 @login_required
 def link_wallet_view(request):
