@@ -71,6 +71,14 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None  # or same-origin
+CSP_FRAME_SRC = ("'self'", "https://widget.coinlib.io")
+CSP_DEFAULT_SRC = ("'self'", "https://widget.coinlib.io")
+
+# Allow external iframes like Coinlib
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+CSP_FRAME_ANCESTORS = ("'self'", "https://widget.coinlib.io")
 
 
 # -----------------------------------------------------------------------------
