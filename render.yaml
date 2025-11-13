@@ -1,12 +1,45 @@
-services:
-  - type: web
-    name: django-app
-    env: python
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn sky_global_assets_project.wsgi:application
-    envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: sky_global_assets_project.settings
-      - key: PYTHON_VERSION
-        value: 3.11
+# Exported from Render on 2025-11-13T07:02:49Z
+version: "1"
+projects:
+- name: Global_asset
+  environments:
+  - name: Production
+    services:
+    - type: web
+      name: global_assets
+      runtime: python
+      repo: https://github.com/Strongcode01/global_assets
+      plan: starter
+      envVars:
+      - key: DJANGO_ALLOWED_HOSTS
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+      - key: DJANGO_DEBUG
+        sync: false
+      - key: POSTGRES_USER
+        sync: false
+      - key: POSTGRES_PORT
+        sync: false
+      - key: POSTGRES_PASSWORD
+        sync: false
+      - key: POSTGRES_HOST
+        sync: false
+      - key: POSTGRES_DB
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      region: oregon
+      buildCommand: pip install -r requirements.txt && python manage.py && python
+        manage.py migrate && python manage.py createsuperuser --noinput || true
+      startCommand: gunicorn sky_global_assets_project.wsgi:application
+      domains:
+      - qfsglobal-assets.com
+      - www.qfsglobal-assets.com
+      autoDeployTrigger: commit
