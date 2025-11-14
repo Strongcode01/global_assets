@@ -137,16 +137,16 @@
                                                 <ul class="btn-grp">
                                                     {% if user.is_authenticated %}
                                                         <li><a href="{% url 'core:login' %}" class="btn btn-md btn-grad btn-round">Sign in to your account</a></li>
-                                                        <li><a href="#" class="btn btn-md btn-grad btn-grad-alternet btn-round">Token Distribution</a></li>
+                                                        <li><a href="#" class="btn btn-md btn-grad btn-grad-alternet btn-round">Visit Account</a></li>
                                                     {% else %}
                                                         <li><a href="{% url 'core:register' %}" class="btn btn-md btn-grad btn-round">Sign up to join</a></li>
-                                                        <li><a href="#" class="btn btn-md btn-grad btn-grad-alternet btn-round">Token Distribution</a></li>
+                                                        <li><a href="{% url 'dashboard:dashboard' %}" class="btn btn-md btn-grad btn-grad-alternet btn-round">Visit Account</a></li>
                                                     {% endif %}
                                                     
                                                 </ul>
                                             </div>
                                             <div class="cpn-social">
-                                                <ul class="social">
+                                                <ul class="social" style="display: none;">
                                                     <li><a href="#"><em class="social-icon fab fa-facebook-f"></em></a></li>
                                                     <li><a href="#"><em class="social-icon fab fa-twitter"></em></a></li>
                                                     <li><a href="#"><em class="social-icon fab fa-youtube"></em></a></li>
@@ -169,7 +169,17 @@
                                                 <div class="countdown-s3 countdown-s4 countdown" data-date="2023/04/27"></div>
                                             </div>
                                             <div class="token-action">
-                                                <a class="btn btn-rg btn-grad btn-grad-alternet btn-round" href="#">join &amp; Buy Token</a>
+                                                <!-- LIVE CRYPTO WIDGETS START -->
+                                                <script src="https://files.coinmarketcap.com/static/widget/currency.js"></script>
+                                                <div class="coinmarketcap-currency-widget" style="display: flex; max-width: fit-content; border: none;" 
+                                                    data-currencyid="52"            
+                                                    data-base="USD"
+                                                    data-ticker="true"
+                                                    data-rank="false"
+                                                    data-marketcap="false"
+                                                    data-volume="false"
+                                                    data-statsticker="false">
+                                                </div>
                                             </div>
                                             <ul class="icon-list">
                                                 <li><em class="fab fa-bitcoin"></em></li>
@@ -191,9 +201,15 @@
             <!-- .header-banner @e -->
         </header>
         <!-- Live Coin Price Ticker -->
-              <div class="market-ticker">
-                <iframe src="https://widget.coinlib.io/widget?type=horizontal_v2&theme=light&pref_coin_id=1505&invert_hover="></iframe>
-              </div>
+            <div class="coingecko-widget-ticker">
+                <script src="https://widgets.coingecko.com/coingecko-coin-ticker-widget.js"></script>
+                <coingecko-coin-ticker-widget 
+                    coin-ids="ripple" 
+                    currency="usd" 
+                    locale="en" 
+                    width="100%" 
+                    height="60">
+                </coingecko-coin-ticker-widget>
         <main class="nk-pages">
             <section class="section bg-white ov-h" id="ico">
                 <div class="container">
@@ -285,8 +301,8 @@
                                         <li>No more expensive fees</li>
                                     </ul>
                                     <ul class="btn-grp justify-content-center justify-content-md-start">
-                                        <li><a href="#" class="btn btn-grad btn-round btn-md">Signup Today</a></li>
-                                        <li>
+                                        <li><a href="{% url 'core:register' %}" class="btn btn-grad btn-round btn-md">Signup Today</a></li>
+                                        <li style="display: none;">
                                             <ul class="btn-grp gutter-15px">
                                                 <li><a href="#"><em class="fab fa-apple"></em></a></li>
                                                 <li><a href="#"><em class="fab fa-android"></em></a></li>
@@ -411,12 +427,7 @@
                     </div>
                 </div><!-- .block @e -->
             </section>
-            <!-- LIVE CRYPTO WIDGETS START -->
-            <!-- Live Crypto Chart -->
-              <div class="market-chart">
-                <iframe src="https://widget.coinlib.io/widget?type=chart&theme=light&coin_id=859&pref_coin_id=1505"></iframe>
-              </div>
-            <!-- // -->
+            
             <section class="section bg-theme tc-light" id="medbed" style="margin-top: 10px;">
                 <div class="container">
                     <div class="section-head text-center wide-auto-sm">
@@ -663,7 +674,7 @@
                         <div class="row">
                             <div class="col">
                                 <div class="wgs wgs-text text-center mb-3">
-                                    <ul class="social pdb-m justify-content-center">
+                                    <ul class="social pdb-m justify-content-center" style="display: none;">
                                         <li><a href="#"><em class="social-icon fab fa-facebook-f"></em></a></li>
                                         <li><a href="#"><em class="social-icon fab fa-twitter"></em></a></li>
                                         <li><a href="#"><em class="social-icon fab fa-youtube"></em></a></li>
