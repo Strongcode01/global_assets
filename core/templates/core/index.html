@@ -611,24 +611,24 @@
                             </div><!-- .col -->
                             <div class="col-xl-8 col-lg-10">
                                 <div class="contact-wrap p-0">
-                                    
-                                    <form id="contact-form-01" class="contact-form nk-form-submit" action="form/contact.php" method="post">
-                                        {{csrf_token}}
-                                        <div class="field-item field-item-center">
+                                    {% csrf_token %}
+                                    <form id="contact-form-01" class="contact-form nk-form-submit" action="form/contact.php" method="post" >
+                                        
+                                        <div class="field-item field-item-center" >
                                             <input name="contact-name" type="text" class="input-line required">
-                                            <label class="field-label field-label-line">Your Name</label>
+                                            <label class="field-label field-label-line" style="font-size: 18px; font-weight: 500;">Your Name</label>
                                         </div>
                                         <div class="field-item field-item-center">
                                             <input name="contact-email" type="email" class="input-line input-line-center required email">
-                                            <label class="field-label field-label-line">Your Email</label>
+                                            <label class="field-label field-label-line" style="font-size: 18px; font-weight: 500;">Your Email</label>
                                         </div>
                                         <div class="field-item field-item-center">
                                             <textarea name="contact-message" class="input-line input-line-center input-textarea required"></textarea>
-                                            <label class="field-label field-label-line">Your Message</label>
+                                            <label class="field-label field-label-line" style="font-size: 18px; font-weight: 500;">Your Message</label>
                                         </div>
                                         <input type="text" class="d-none" name="form-anti-honeypot" value="">
                                         <div class="field-wrap">
-                                            <button type="submit" class="btn btn-round btn-lg btn-grad">Submit</button>
+                                            <button type="submit" class="btn btn-round btn-lg btn-grad" style="font-size: 18px; font-weight: 500;">Submit</button>
                                             <div class="form-results"></div>
                                         </div>
                                     </form>
@@ -651,8 +651,9 @@
                                 <div class="wide-auto-sm section-head section-head-sm pdb-r">
                                     <h4 class="title title-md">Don't miss out, Stay updated</h4>
                                 </div>
+                                {% csrf_token %}
                                 <form action="form/subscribe.php" class="nk-form-submit" method="post">
-                                    {{csrf_token}}
+                                    
                                     <div class="field-inline field-inline-round field-inline-s2-sm bg-theme-dark-alt shadow-soft">
                                         <div class="field-wrap">
                                             <input class="input-solid input-solid-md required email" type="text" name="contact-email" placeholder="Enter your email">
