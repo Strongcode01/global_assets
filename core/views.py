@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, ContactForm, SubscribeForm
 from django.contrib.auth import authenticate, login as auth_login, logout
 
 def register_view(request):
@@ -89,3 +89,33 @@ def wallet(request):
 
 def blank(request):
     return render(request, "core/_blank.html")
+
+
+def contact(request):
+    if request.method == "POST":
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your message has been sent successfully!")
+            return redirect(request.META.get('HTTP_REFERER'))
+        else:
+            messages.error(request, "Please correct the errors in the form.")
+    else:
+        form = ContactForm()
+
+    return render(request, "core/contact.html", {"form": form})
+
+
+def subscribe_view(request):
+    if request.method == "POST":
+        form = SubscribeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "You have successfully subscribed!")
+            return redirect(request.META.get('HTTP_REFERER'))
+        else:
+            messages.error(request, "Invalid email address.")
+    else:
+        form = SubscribeForm()
+
+    return render(request, "core/subscribe.html", {"form": form})

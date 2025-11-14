@@ -21,4 +21,5 @@ urlpatterns = [
     # Blog
     path("blog/", views.blog, name="blog"),
     path("blog/detail/", views.blog_detail, name="blog_detail"),
+    path("subscribe/", views.subscribe_view, name="subscribe"),
 ]
