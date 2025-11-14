@@ -56,12 +56,18 @@ def logout_view(request):
 
 
 def home(request):
-    return render(request, "core/index.html")
+    context = {
+        'tg_username':'qfs_support123' 
+        }
+    return render(request, "core/index.html", context)
 
 def about(request):
     return render(request, "core/about.html")
 
 def contact(request):
+    context = {
+        'tg_username':'qfs_support123' 
+        }
     return render(request, "core/contact.html")
 
 def career(request):

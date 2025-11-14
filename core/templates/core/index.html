@@ -588,8 +588,8 @@
                     <div class="nk-block block-contact">
                         <div class="row justify-content-center text-center">
                             <div class="col-xl-8 col-lg-10">
-                                <ul class="contact-list contact-list-s1 flex-wrap flex-md-nowrap pdb-l">
-                                    <li>
+                                <ul class="contact-list contact-list-s1 flex-wrap flex-md-nowrap pdb-l" style="font-size: 16px; font-weight: 600; color: black;">
+                                    <li style="display: none;">
                                         <em class="contact-icon fas fa-phone"></em>
                                         <div class="contact-text">
                                             <span>+44 0123 4567</span>
@@ -598,20 +598,22 @@
                                     <li>
                                         <em class="contact-icon fas fa-envelope"></em>
                                         <div class="contact-text">
-                                            <span>qfsglobalasset.org@gmail.com</span>
+                                            <span>qfsmanagement0@gmail.com</span>
                                         </div>
                                     </li>
                                     <li>
                                         <em class="contact-icon fas fa-paper-plane"></em>
                                         <div class="contact-text">
-                                            <span><a href="https//t.me/qfs_support123">Join us on Telegram</a></span>
+                                            <span><a href="https://t.me/{{tg_username}}" target="_blank" rel="noopener noreferrer">Join us on Telegram</a></span>
                                         </div>
                                     </li>
                                 </ul>
                             </div><!-- .col -->
                             <div class="col-xl-8 col-lg-10">
                                 <div class="contact-wrap p-0">
+                                    
                                     <form id="contact-form-01" class="contact-form nk-form-submit" action="form/contact.php" method="post">
+                                        {{csrf_token}}
                                         <div class="field-item field-item-center">
                                             <input name="contact-name" type="text" class="input-line required">
                                             <label class="field-label field-label-line">Your Name</label>
@@ -650,6 +652,7 @@
                                     <h4 class="title title-md">Don't miss out, Stay updated</h4>
                                 </div>
                                 <form action="form/subscribe.php" class="nk-form-submit" method="post">
+                                    {{csrf_token}}
                                     <div class="field-inline field-inline-round field-inline-s2-sm bg-theme-dark-alt shadow-soft">
                                         <div class="field-wrap">
                                             <input class="input-solid input-solid-md required email" type="text" name="contact-email" placeholder="Enter your email">
