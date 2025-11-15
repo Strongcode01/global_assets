@@ -1,4 +1,5 @@
 # views.py
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
@@ -12,7 +13,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from itertools import chain
 from django.db.models import Value, CharField
-
 
 
 @login_required
@@ -38,6 +38,7 @@ def dashboard_view(request):
         'profile': profile,
         'wallets': wallets,
         'transactions': transactions[:10],
+        "tg_username": settings.TG_USERNAME
     }
     return render(request, 'dashboard/index.html', context)
 

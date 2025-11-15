@@ -174,7 +174,7 @@ STATICFILES_STORAGE = (
 LOGIN_URL = reverse_lazy("core:login")
 LOGIN_REDIRECT_URL = reverse_lazy("dashboard:dashboard")
 LOGOUT_REDIRECT_URL = reverse_lazy("core:home")
-
+TG_USERNAME = "qfs_support123"
 
 # -----------------------------------------------------------------------------
 # COOKIE & SECURITY SETTINGS

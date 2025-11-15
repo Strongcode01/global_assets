@@ -26,3 +26,4 @@ def user_profile_context(request):
             "profile_pic_url": kyc.profile_pic.url if kyc and kyc.profile_pic else None,
         }
     return {}
+
