@@ -283,16 +283,17 @@
       </div>
 
       <div class="upload-group">
-        <label for="{{ form.kyc_doc.id_for_label }}">Upload ID Document</label>
-        {{ form.kyc_doc }}
-        {{ form.kyc_doc.errors }}
-      </div>
+      {{ form.kyc_doc.label }}
+      {{ form.kyc_doc }}
+      {{ form.kyc_doc.errors }}
+    </div>
 
-      <div class="upload-group">
-        <label for="{{ form.profile_pic.id_for_label }}">Upload Profile Picture</label>
-        {{ form.profile_pic }}
-        {{ form.profile_pic.errors }}
-      </div>
+    <div class="upload-group">
+      {{ form.profile_pic.label }}
+      {{ form.profile_pic }}
+      {{ form.profile_pic.errors }}
+    </div>
+
 
       <button type="submit" class="btn-submit">Submit KYC</button>
     </form>

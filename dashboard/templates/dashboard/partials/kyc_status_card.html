@@ -1,184 +1,163 @@
 {% block extra_css %}
 <style>
-/* === KYC Status Card Styling === */
+
+/* ---------- CONTAINER CARD ---------- */
 .kyc-status-card {
-  /* position: relative; */
-  background: #c5c5c5;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, #ffffff, #f5f7ff);
+  border-radius: 18px;
   padding: 2rem;
   margin: 2rem auto;
-  max-width: 700px;
-  transition: all 0.3s ease;
-  align-self: center;
-  justify-content: center;
+  max-width: 780px;
+  border: 1px solid #e6e8ff;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  transition: 0.3s ease;
 }
 
 .kyc-status-card:hover {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 22px rgba(0,0,0,0.10);
 }
 
+/* ---------- TEXT GENERAL ---------- */
 .kyc-status-card p, 
 .kyc-status-card strong {
   font-size: 1rem;
-  line-height: 1.6;
-  color: #333;
-  margin-bottom: 15px;
+  line-height: 1.65;
+  color: #222;
+  margin-bottom: 12px;
+  font-family: "Poppins", sans-serif;
 }
 
-/* === Center-Top Info Container === */
-.kyc-info-container {
-  display: block;
-  background: #a9a9fa;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
-  margin-top: 2rem;
-  width: 80%;
-  text-align: left;
-  font-size: 24px;
-  font-family: poppins, league spartan;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-
-}
-
-/* === Badge Styles === */
+/* ---------- BADGES ---------- */
 .badge {
   display: inline-block;
-  padding: 6px 14px;
-  border-radius: 25px;
-  font-size: 0.9rem;
+  padding: 7px 16px;
+  border-radius: 40px;
+  font-size: 0.82rem;
   font-weight: 600;
-  margin-right: 8px;
+  margin-bottom: 10px;
   color: white;
+  letter-spacing: .3px;
 }
 
-.badge.verified {
-  background: #28a745; /* Green */
-}
+.badge.verified { background:#1dbf73; }
+.badge.pending { background:#ffcc00; color:#222; }
+.badge.unverified { background:#e63946; }
 
-.badge.pending {
-  background: #ffc107; /* Yellow */
-  color: #222;
-}
-
-.badge.unverified {
-  background: #dc3545; /* Red */
-}
-
-/* === Buttons === */
+/* ---------- ACTION BUTTONS ---------- */
 .kyc-card-actions {
-  margin-top: 15px;
+  margin-top: 20px;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
 }
 
-.btn,
-.btn-outline {
-  display: inline-block;
-  padding: 10px 18px;
-  border-radius: 6px;
+.btn, .btn-outline {
+  padding: 11px 22px;
+  border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
+  font-size: 0.94rem;
+  transition: 0.25s ease;
+  font-family: "Poppins", sans-serif;
 }
 
 .btn {
-  background: #007bff;
+  background: #4a67ff;
   color: #fff;
   border: none;
 }
 
-.btn:hover {
-  background: #0056b3;
-}
+.btn:hover { background:#2e4be0; }
 
 .btn-outline {
-  border: 2px solid #007bff;
-  color: #007bff;
+  border: 2px solid #4a67ff;
+  color: #4a67ff;
   background: transparent;
 }
 
 .btn-outline:hover {
-  background: #007bff;
-  color: #fff;
+  background:#4a67ff;
+  color:#fff;
 }
 
-/* === KYC Preview === */
-.kyc-preview {
-  margin-top: 20px;
-  border-top: 1px solid #ddd;
-  padding-top: 15px;
+/* ---------- INFO BOX ---------- */
+.kyc-info-container {
+  margin-top: 2rem;
+  background: #eef0ff;
+  border: 1px solid #d4d7ff;
+  border-radius: 14px;
+  padding: 1.5rem;
+  width: 85%;
+  text-align: left;
+  font-size: 18px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+  animation: fadeIn .4s ease;
 }
 
+/* Fade animation */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+/* ---------- PREVIEW SECTION ---------- */
 .kyc-preview h4 {
-  font-size: 1.1rem;
-  color: #444;
-  margin-bottom: 10px;
+  font-size: 1.15rem;
+  color:#2a2a40;
+  margin-bottom: 14px;
   font-weight: 600;
 }
 
 .kyc-preview p {
-  margin: 4px 0;
-  font-size: 0.95rem;
-  color: #333;
+  font-size: .97rem;
+  margin: 5px 0;
+  color:#333;
 }
 
-/* === Profile Image === */
+/* ---------- PROFILE PICTURE ---------- */
 .preview-image {
-  margin-top: 10px;
-  text-align: center;
+  text-align:center;
+  margin-top:14px;
 }
 
 .preview-image img {
-  width: 130px;
-  height: 130px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 3px solid #007bff;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  width:135px;
+  height:135px;
+  border-radius:50%;
+  object-fit:cover;
+  border: 3px solid #4a67ff;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.10);
 }
 
-/* === Document Link === */
+/* ---------- DOCUMENT LINK ---------- */
 .btn-doc-link {
-  display: inline-block;
-  margin-top: 10px;
-  color: #007bff;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s;
+  font-weight:600;
+  color:#4a67ff;
+  text-decoration:none;
 }
 
 .btn-doc-link:hover {
   text-decoration: underline;
-  color: #0056b3;
+  color:#2e4be0;
 }
 
-/* === Responsive Layout === */
-@media (max-width: 600px) {
-  .kyc-status-card {
-    padding: 18px;
-  }
-
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 650px) {
+  .kyc-status-card { padding: 1.4rem; }
+  .kyc-info-container { width: 100%; padding: 1.2rem; }
   .btn, .btn-outline {
     flex: 1 1 100%;
-    text-align: center;
+    text-align:center;
   }
-
   .preview-image img {
-    width: 110px;
-    height: 110px;
-  }
-
-  .kyc-info-container {
-    width: 95%;
-    top: -0.5rem;
+    width:115px;
+    height:115px;
   }
 }
+
 </style>
 {% endblock %}
+
 
 
 <div class="kyc-status-card">
@@ -227,7 +206,7 @@
                     <p><strong>ID Number:</strong> {{ kyc.id_number|default:"—" }}</p>
                     
                     {% if kyc.kyc_doc %}
-                    <strong>ID Image:</strong><p><a href="{{ kyc.kyc_doc.url }}" target="_blank" class="btn-doc-link">View Uploaded ID </a></p>
+                    <strong>ID Doc:</strong><p><a href="{{ kyc.kyc_doc.url }}" target="_blank" class="btn-doc-link">View Uploaded ID </a></p>
                     {% endif %}
                     
                     {% if kyc.profile_pic %}
