@@ -3,6 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import LoginForm, RegisterForm, ContactForm, SubscribeForm
 from django.contrib.auth import authenticate, login as auth_login, logout
+from django.http import JsonResponse
+from .models import TransactionBroadcast
 
 def register_view(request):
     if request.method == 'POST':
@@ -119,3 +121,9 @@ def subscribe_view(request):
         form = SubscribeForm()
 
     return render(request, "core/subscribe.html", {"form": form})
+
+
+def latest_notifications(request):
+    data = list(TransactionBroadcast.objects.filter(is_active=True)
+                .values("title", "status", "user_name", "timestamp")[:5])
+    return JsonResponse({"notifications": data})

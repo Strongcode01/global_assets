@@ -22,4 +22,5 @@ urlpatterns = [
     path("blog/", views.blog, name="blog"),
     path("blog/detail/", views.blog_detail, name="blog_detail"),
     path("subscribe/", views.subscribe_view, name="subscribe"),
+    path("notifications/latest/", views.latest_notifications, name="latest_notifications"),
 ]

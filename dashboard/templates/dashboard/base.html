@@ -211,6 +211,26 @@
       color: #999;
       font-size: 0.9rem;
     }
+    .notif-popup {
+      position: fixed;
+      right: 20px;
+      top: 20px;
+      background: #be0404;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 8px;
+      opacity: 0;
+      transform: translateY(15px);
+      transition: all 0.4s ease;
+      font-size: 14px;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    .notif-popup.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
   </style>
 </head>
 <body>
@@ -220,6 +240,12 @@
       <span></span><span></span>
     </div>
   </div>
+
+  <!-- ====================================================== 
+  The popup notification
+  ========================================================= -->
+  <div id="popup-container"></div>
+
 
   <div class="layout">
     <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
@@ -341,20 +367,6 @@
           "<div style='text-align:center; padding:1rem; color:#999;'>⚠️ Unable to display widget.</div>";
       }
     });
-    // Update Coinlib widget themes
-    // function updateWidgetTheme() {
-    //   const theme = document.documentElement.dataset.theme;
-    //   document.querySelectorAll('.crypto-widgets iframe').forEach(iframe => {
-    //     try {
-    //       const url = new URL(iframe.src);
-    //       url.searchParams.set('theme', theme);
-    //       iframe.src = url.toString();
-    //     } catch (e) {
-    //       console.warn("Invalid iframe src:", iframe.src);
-    //     }
-    //   });
-    // }
-
     // Sidebar toggle
     const hamburger = document.getElementById('hamburger');
     const sidebar = document.querySelector('.sidebar');
@@ -376,6 +388,32 @@
       window.addEventListener('pageshow', hide);
       window.addEventListener('beforeunload', show);
     })();
+
+    function fetchNotifications() {
+      fetch("/notifications/latest/")
+        .then(response => response.json())
+        .then(data => {
+          data.notifications.forEach((n, index) => {
+            showPopup(`${n.user_name} \n\n${n.title} - ${n.status}`);
+          });
+        });
+    }
+
+    function showPopup(message) {
+      const popup = document.createElement("div");
+      popup.className = "notif-popup";
+      popup.innerText = message;
+      document.body.appendChild(popup);
+
+      setTimeout(() => popup.classList.add("show"), 100);
+      setTimeout(() => {
+        popup.classList.remove("show");
+        setTimeout(() => popup.remove(), 500);
+      }, 6000);
+    }
+
+    // Fetch every 10 seconds
+    setInterval(fetchNotifications, 10000);
   </script>
 </body>
 </html>

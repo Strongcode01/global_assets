@@ -17,3 +17,15 @@ class Subscriber(models.Model):
     def __str__(self):
         return self.email
 
+class TransactionBroadcast(models.Model):
+    title = models.CharField(max_length=200)  # e.g. "Withdrawal"
+    status = models.CharField(max_length=100)  # e.g. "Successful", "Pending"
+    user_name = models.CharField(max_length=200)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.title} - {self.status} - {self.user_name}"
