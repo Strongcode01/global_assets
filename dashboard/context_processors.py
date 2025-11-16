@@ -12,7 +12,6 @@ def user_profile_context(request):
         return {'profile': profile, 'kyc': kyc}
     return {}
 
-from .models import KYC
 
 def user_profile_context(request):
     if request.user.is_authenticated:

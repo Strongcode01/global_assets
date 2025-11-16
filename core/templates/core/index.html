@@ -1,7 +1,8 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="zxx" class="js">
-
+{% block head %}
 <head>
     <meta charset="utf-8">
     <meta name="author" content="Softnio">
@@ -64,7 +65,8 @@
       }
     </style>
 </head>
-
+{% endblock %}
+{% block content %}
 <body class="nk-body body-wider theme-dark mode-onepage">
     <div class="nk-wrap">
         <header class="nk-header page-header is-transparent is-sticky is-shrink is-dark" id="header">
@@ -773,6 +775,66 @@
     <script src="{% static 'core/js/scripts.js' %}"></script>
     <script src="{% static 'core/js/charts.js' %}"></script>
     <script src="{% static 'core/js/charts.js' %}"></script>
-    
+    <!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .notif-popup {
+            position: fixed;
+            right: 20px;
+            top: 120px;
+            background: #1235d471;
+            color: #ffffff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.4s ease;
+            font-size: 14px;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            }
+            .notif-popup.show {
+            opacity: 1;
+            transform: translateY(0);
+            }
+        </style>
+    </head>
+    <body>
+         <!-- ====================================================== 
+  The popup notification
+  ========================================================= -->
+  <div id="popup-container"></div>
+
+    <script>
+        function fetchNotifications() {
+        fetch("/notifications/latest/")
+            .then(response => response.json())
+            .then(data => {
+            data.notifications.forEach((n, index) => {
+                showPopup(`User: ${n.user_name}\n${n.title} - ${n.status}\n${n.created_at}`);
+            });
+            });
+        }
+
+        function showPopup(message) {
+        const popup = document.createElement("div");
+        popup.className = "notif-popup";
+        popup.innerText = message;
+        document.body.appendChild(popup);
+
+        setTimeout(() => popup.classList.add("show"), 100);
+        setTimeout(() => {
+            popup.classList.remove("show");
+            setTimeout(() => popup.remove(), 500);
+        }, 6000);
+        }
+
+        // Fetch every 10 seconds
+        setInterval(fetchNotifications, 10000)
+    </script>
+    </body>
+</html>
 </body>
 </html>
+{% endblock %}

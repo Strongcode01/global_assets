@@ -5,6 +5,8 @@ from .forms import LoginForm, RegisterForm, ContactForm, SubscribeForm
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.http import JsonResponse
 from .models import TransactionBroadcast
+from django.db.models import F
+import random
 
 def register_view(request):
     if request.method == 'POST':
@@ -122,8 +124,26 @@ def subscribe_view(request):
 
     return render(request, "core/subscribe.html", {"form": form})
 
-
 def latest_notifications(request):
-    data = list(TransactionBroadcast.objects.filter(is_active=True)
-                .values("title", "status", "user_name", "timestamp")[:5])
-    return JsonResponse({"notifications": data})
+    data = list(
+        TransactionBroadcast.objects.filter(is_active=True)
+        .values("title", "status", "user_name", "timestamp")
+    )
+
+    # Shuffle so results appear randomly
+    random.shuffle(data)
+
+    # Limit to 5 random notifications
+    data = data[:5]
+
+    return JsonResponse({
+        "notifications": [
+            {
+                "user_name": n["user_name"],
+                "title": n["title"],
+                "status": n["status"],
+                "created_at": n["timestamp"].strftime("%Y-%m-%d %H:%M") if n["timestamp"] else ""
+            }
+            for n in data
+        ]
+    })

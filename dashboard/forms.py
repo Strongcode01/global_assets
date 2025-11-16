@@ -66,8 +66,7 @@ class KYCForm(forms.ModelForm):
             'country': forms.TextInput(attrs={'placeholder': 'Country of residence'}),
             'id_type': forms.TextInput(attrs={'placeholder': "e.g. Passport, Driver's License", 'label':'Valid ID'}),
             'id_number': forms.TextInput(attrs={'placeholder': 'ID Number'}), 
-            # 'kyc_doc': forms.FileField(attrs={'placeholder':'Upload ID Doc'}),
-            # 'profile_pic':forms.ImageField(attrs={'placeholder':'Upload profile picture'}) 
+             
         }
         
 
