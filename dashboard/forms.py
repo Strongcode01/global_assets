@@ -112,7 +112,13 @@ class SwapForm(forms.ModelForm):
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount'}),
         }
 
+# forms.py
+from django import forms
+from .models import CardRequest
+
+
 class CardPreOrderForm(forms.ModelForm):
+    # extra field (not stored directly on model)
     pin = forms.CharField(
         max_length=4,
         widget=forms.PasswordInput(attrs={"placeholder": "1234"}),
@@ -121,10 +127,11 @@ class CardPreOrderForm(forms.ModelForm):
 
     class Meta:
         model = CardRequest
-        fields = ["name_on_card", "pin"]
+        # only include model fields here — 'pin' is defined above as an extra form field
+        fields = ["name_on_card"]
 
     def clean_pin(self):
-        pin = self.cleaned_data["pin"]
+        pin = self.cleaned_data.get("pin", "")
         if not pin.isdigit() or len(pin) != 4:
             raise forms.ValidationError("PIN must be 4 numeric digits.")
         return pin

@@ -254,6 +254,7 @@ def generate_luhn_number(prefix="4567", length=16):
         candidate = number + str(check)
         if luhn_checksum(candidate):
             return candidate
+    # fallback (shouldn't usually happen)
     return number + "0"
 
 
@@ -262,7 +263,8 @@ def generate_cvv():
 
 
 class CardRequest(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+    # OneToOneField is already unique — no need to pass unique=True explicitly
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     name_on_card = models.CharField(max_length=100)
     requested_at = models.DateTimeField(auto_now_add=True)
     pin_hash = models.CharField(max_length=128)

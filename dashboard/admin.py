@@ -144,14 +144,16 @@ class CardRequestAdmin(admin.ModelAdmin):
         for req in queryset.filter(status="pending"):
             card, cvv = Card.issue_card_for_request(req)
             approved_count += 1
+            # message_user expects level numeric constant from django.contrib.messages
             self.message_user(
                 request,
-                f"Card issued for {req.user.username}. "
-                f"Save CVV securely: {cvv}"
+                f"Card issued for {req.user.username}. Save CVV securely: {cvv}",
+                level=messages.INFO,
             )
 
         if not approved_count:
-            self.message_user(request, "No pending card requests selected.", level="warning")
+            self.message_user(request, "No pending card requests selected.", level=messages.WARNING)
+
 
 @admin.register(Card)
 class CardAdmin(admin.ModelAdmin):
