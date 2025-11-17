@@ -1,5 +1,5 @@
 from django import forms
-from .models import Wallet, WalletName, Deposit, Swap, Withdraw, Buy, KYC
+from .models import Card, Wallet, WalletName, Deposit, Swap, Withdraw, Buy, KYC, CardRequest
 import re
 from django.core.exceptions import ValidationError
 
@@ -111,3 +111,20 @@ class SwapForm(forms.ModelForm):
             'to_asset': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'To'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount'}),
         }
+
+class CardPreOrderForm(forms.ModelForm):
+    pin = forms.CharField(
+        max_length=4,
+        widget=forms.PasswordInput(attrs={"placeholder": "1234"}),
+        label="Transaction PIN"
+    )
+
+    class Meta:
+        model = CardRequest
+        fields = ["name_on_card", "pin"]
+
+    def clean_pin(self):
+        pin = self.cleaned_data["pin"]
+        if not pin.isdigit() or len(pin) != 4:
+            raise forms.ValidationError("PIN must be 4 numeric digits.")
+        return pin

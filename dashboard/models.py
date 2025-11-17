@@ -5,8 +5,10 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db.models import F
 from django.conf import settings
-from decimal import Decimal
 import uuid
+from django.contrib.auth.hashers import make_password, check_password
+import random
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -216,3 +218,107 @@ class Swap(models.Model):
 
     def __str__(self):
         return f"Swap {self.amount} {self.from_asset} to {self.to_asset}"
+
+
+# =============================================================
+# QFS Card Models (Final Best-Practice Version)
+# =============================================================
+
+CARD_STATUS = [
+    ("pending", "Pending"),
+    ("approved", "Approved"),
+    ("rejected", "Rejected"),
+]
+
+
+def luhn_checksum(card_number: str) -> bool:
+    digits = [int(d) for d in card_number if d.isdigit()]
+    checksum = 0
+    parity = len(digits) % 2
+    for i, digit in enumerate(digits):
+        d = digit
+        if i % 2 == parity:
+            d = d * 2
+            if d > 9:
+                d -= 9
+        checksum += d
+    return checksum % 10 == 0
+
+
+def generate_luhn_number(prefix="4567", length=16):
+    number = prefix
+    while len(number) < (length - 1):
+        number += str(random.randint(0, 9))
+
+    for check in range(10):
+        candidate = number + str(check)
+        if luhn_checksum(candidate):
+            return candidate
+    return number + "0"
+
+
+def generate_cvv():
+    return f"{random.randint(0, 999):03d}"
+
+
+class CardRequest(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+    name_on_card = models.CharField(max_length=100)
+    requested_at = models.DateTimeField(auto_now_add=True)
+    pin_hash = models.CharField(max_length=128)
+    status = models.CharField(max_length=20, choices=CARD_STATUS, default="pending")
+    admin_message = models.TextField(blank=True, null=True)
+
+    def set_pin(self, pin_plain: str):
+        self.pin_hash = make_password(pin_plain)
+
+    def check_pin(self, pin_plain: str) -> bool:
+        return check_password(pin_plain, self.pin_hash)
+
+    def __str__(self):
+        return f"CardRequest({self.user.username} - {self.status})"
+
+
+class Card(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    name_on_card = models.CharField(max_length=100)
+    masked_pan = models.CharField(max_length=32)
+    last4 = models.CharField(max_length=4)
+    expiry_month = models.PositiveSmallIntegerField()
+    expiry_year = models.PositiveSmallIntegerField()
+    card_token = models.CharField(max_length=64, unique=True)
+    issued_at = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField(default=True)
+
+    @property
+    def display_expiry(self):
+        return f"{self.expiry_month:02d}/{str(self.expiry_year)[-2:]}"
+
+    @staticmethod
+    def issue_card_for_request(card_request: CardRequest):
+        if Card.objects.filter(user=card_request.user).exists():
+            raise ValueError("User already has a card issued")
+
+        pan = generate_luhn_number()
+        cvv = generate_cvv()
+        expiry_year = timezone.now().year + 3
+        expiry_month = random.randint(1, 12)
+        last4 = pan[-4:]
+        masked = "#### #### #### " + last4
+
+        token = uuid.uuid4().hex
+
+        card = Card.objects.create(
+            user=card_request.user,
+            name_on_card=card_request.name_on_card,
+            masked_pan=masked,
+            last4=last4,
+            expiry_month=expiry_month,
+            expiry_year=expiry_year,
+            card_token=token,
+            active=True,
+        )
+
+        card_request.status = "approved"
+        card_request.save(update_fields=["status"])
+        return card, cvv

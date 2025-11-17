@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 app_name = 'dashboard'
+namespace='dashboard'
 
 urlpatterns = [
     path('', views.dashboard_view, name='dashboard'),
@@ -15,4 +16,5 @@ urlpatterns = [
     path("withdraw/", views.withdraw_view, name="withdraw"),
     path("swap/", views.swap_view, name="swap"),
     path('get-balance/', views.get_balance, name='get_balance'), 
+    path('my-card/', views.my_card, name='my_card'),
 ]

@@ -1,9 +1,7 @@
 from django.utils import timezone
-from django.contrib import admin
-from .models import Wallet, UserProfile, WalletName, Deposit, KYC, Withdraw
+from django.contrib import admin, messages
+from .models import Wallet, UserProfile, WalletName, Deposit, KYC, Withdraw, CardRequest, Card
 from django.db import transaction
-from django.db.models import F
-from django.contrib import messages
 
 
 @admin.register(WalletName)
@@ -131,3 +129,31 @@ class WithdrawAdmin(admin.ModelAdmin):
     def mark_failed(self, request, queryset):
         updated = queryset.update(status='failed')
         self.message_user(request, f"{updated} withdrawal(s) marked as failed.", level=messages.WARNING)
+
+
+@admin.register(CardRequest)
+class CardRequestAdmin(admin.ModelAdmin):
+    list_display = ("user", "name_on_card", "status", "requested_at")
+    list_filter = ("status",)
+    actions = ["approve_card_requests"]
+
+    @admin.action(description="Approve selected card requests")
+    def approve_card_requests(self, request, queryset):
+        approved_count = 0
+
+        for req in queryset.filter(status="pending"):
+            card, cvv = Card.issue_card_for_request(req)
+            approved_count += 1
+            self.message_user(
+                request,
+                f"Card issued for {req.user.username}. "
+                f"Save CVV securely: {cvv}"
+            )
+
+        if not approved_count:
+            self.message_user(request, "No pending card requests selected.", level="warning")
+
+@admin.register(Card)
+class CardAdmin(admin.ModelAdmin):
+    list_display = ("user", "masked_pan", "display_expiry", "active", "issued_at")
+    readonly_fields = ("masked_pan", "last4", "card_token", "issued_at")

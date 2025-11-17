@@ -131,11 +131,11 @@
     }
 
     .profile-avatar {
-      width: 70px;
-      height: 70px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid #ddd;
+      border: 1px solid #ddd;
       box-shadow: 0 3px 6px rgba(0,0,0,0.1);
     }
 
@@ -258,6 +258,7 @@
         <a href="{% url 'dashboard:link_wallet' %}">Link Wallet</a>
         <a href="{% url 'dashboard:transactions' %}">Transactions</a>
         <a href="{% url 'dashboard:kyc' %}">KYC Status</a>
+        <a href="{% url 'dashboard:my_card' %}">QFS Credit Card</a>
         <a href="{% url 'core:home' %}">Home</a>
         <a href="https://t.me/{{tg_username}}" target="_blank" rel="noopener noreferrer">Supports</a></span>
         <a href="{% url 'core:logout' %}">Logout</a>
@@ -285,9 +286,9 @@
           <img src="{% static 'dashboard/images/default-avatar.png' %}" 
                alt="Default avatar" class="profile-avatar" loading="lazy">
         {% endif %}
-        <h2 class="welcome-title">
+        <h4 class="welcome-title">
           Hi, {{ request.user.username|default:"User" }}
-        </h2>
+        </h4>
       </div>
 
       <!-- LIVE CRYPTO WIDGETS -->

@@ -6,13 +6,14 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction, models
 import uuid
-from .models import User, UserProfile, Wallet, Deposit, Buy, Withdraw, Swap, KYC
-from .forms import WalletForm, DepositForm, BuyForm, WithdrawForm, SwapForm, KYCForm
+from .models import Card, User, UserProfile, Wallet, Deposit, Buy, Withdraw, Swap, KYC, CardRequest
+from .forms import CardPreOrderForm, WalletForm, DepositForm, BuyForm, WithdrawForm, SwapForm, KYCForm
 from django.db.models import F
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from itertools import chain
 from django.db.models import Value, CharField
+import re
 
 
 @login_required
@@ -295,3 +296,36 @@ def swap_view(request):
     else:
         form = SwapForm()
     return render(request, "dashboard/swap.html", {"form": form, "profile": profile})
+
+
+def my_card(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    # Fetch user's card and card request
+    card = Card.objects.filter(user=request.user).first()
+    card_request = CardRequest.objects.filter(user=request.user).first()
+
+    # Render Active Card page if card exists
+    if card:
+        return render(request, "cards/card_active.html", {"card": card})
+
+    # Render Pending Card page if preorder exists
+    elif card_request:
+        return render(request, "cards/card_pending.html", {"card_request": card_request})
+
+    # Render Preorder Card page if no card/request exists
+    else:
+        if request.method == "POST":
+            form = CardPreOrderForm(request.POST)
+            if form.is_valid():
+                card_req = form.save(commit=False)
+                card_req.user = request.user
+                card_req.set_pin(form.cleaned_data["pin"])
+                card_req.save()
+                messages.success(request, "🎉 Your card preorder has been submitted successfully!")
+                return redirect("my_card")
+        else:
+            form = CardPreOrderForm()
+
+        return render(request, "cards/card_preorder.html", {"form": form})
