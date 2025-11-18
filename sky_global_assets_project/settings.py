@@ -69,7 +69,7 @@ INSTALLED_APPS = [
 # MIDDLEWARE
 # -----------------------------------------------------------------------------
 MIDDLEWARE = [
-    "dashboard.middleware.staff_debug.StaffDebugMiddlwware",
+    "dashboard.middleware.staff_debug.StaffDebugMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
