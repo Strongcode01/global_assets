@@ -6,3 +6,5 @@ dj-database-url
 pillow
 whitenoise
 django-csp
+django-fernet-fields
+django-encrypted-model-fields

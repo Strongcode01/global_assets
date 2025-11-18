@@ -157,5 +157,10 @@ class CardRequestAdmin(admin.ModelAdmin):
 
 @admin.register(Card)
 class CardAdmin(admin.ModelAdmin):
-    list_display = ("user", "masked_pan", "display_expiry", "active", "issued_at")
-    readonly_fields = ("masked_pan", "last4", "card_token", "issued_at")
+    list_display = ('user', 'masked_pan_display', 'last4', 'display_expiry', 'active', 'issued_at')
+    readonly_fields = ('masked_pan_display', 'last4', 'display_expiry', 'card_token', 'issued_at')
+
+    # Use a callable to display the masked PAN
+    def masked_pan_display(self, obj):
+        return obj.masked_pan  # Calls the property
+    masked_pan_display.short_description = "Masked PAN"

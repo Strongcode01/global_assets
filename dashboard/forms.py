@@ -64,7 +64,7 @@ class KYCForm(forms.ModelForm):
         widgets = {
             'full_name': forms.TextInput(attrs={'placeholder': 'Your full name'}),
             'country': forms.TextInput(attrs={'placeholder': 'Country of residence'}),
-            'id_type': forms.TextInput(attrs={'placeholder': "e.g. Passport, Driver's License", 'label':'Valid ID'}),
+            'id_type': forms.TextInput(attrs={'placeholder': "e.g. Passport, Driving License", 'label':'Valid ID'}),
             'id_number': forms.TextInput(attrs={'placeholder': 'ID Number'}), 
              
         }

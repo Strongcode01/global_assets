@@ -8,6 +8,14 @@ from django.urls import reverse_lazy
 from dotenv import load_dotenv
 import os
 import dj_database_url
+import base64
+
+# Generate a secure 32-byte key (Base64 encoded)
+FIELD_ENCRYPTION_KEY = os.environ.get(
+    "FIELD_ENCRYPTION_KEY",
+    base64.urlsafe_b64encode(os.urandom(32))
+)
+
 
 # -----------------------------------------------------------------------------
 # ENVIRONMENT & PATHS
@@ -50,6 +58,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'django_cryptography',
 
     # Local apps
     "core",

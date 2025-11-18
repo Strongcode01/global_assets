@@ -322,7 +322,7 @@ def my_card(request):
             card_req.set_pin(form.cleaned_data["pin"])
             card_req.save()
             messages.success(request, "🎉 Your card preorder has been submitted successfully!")
-            return redirect("my_card")
+            return redirect("dashboard:my_card")  # <-- fixed redirect
     else:
         form = CardPreOrderForm()
 

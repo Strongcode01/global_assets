@@ -9,6 +9,7 @@ import uuid
 from django.contrib.auth.hashers import make_password, check_password
 import random
 from django.utils import timezone
+from encrypted_model_fields.fields import EncryptedCharField
 
 User = get_user_model()
 
@@ -284,7 +285,7 @@ class CardRequest(models.Model):
 class Card(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name_on_card = models.CharField(max_length=100)
-    masked_pan = models.CharField(max_length=32)
+    card_number = EncryptedCharField(max_length=255, blank=True, null=True)
     last4 = models.CharField(max_length=4)
     expiry_month = models.PositiveSmallIntegerField()
     expiry_year = models.PositiveSmallIntegerField()
@@ -293,8 +294,21 @@ class Card(models.Model):
     active = models.BooleanField(default=True)
 
     @property
+    def pan(self):
+        """Securely returns decrypted card number"""
+        return self.card_number
+
+    @property
+    def masked(self):
+        """Always returns masked card number"""
+        if not self.pan:
+            return "**** **** **** ****"
+        return "**** **** **** " + self.pan[-4:]
+
+    @property
     def display_expiry(self):
         return f"{self.expiry_month:02d}/{str(self.expiry_year)[-2:]}"
+
 
     @staticmethod
     def issue_card_for_request(card_request: CardRequest):
@@ -311,15 +325,16 @@ class Card(models.Model):
         token = uuid.uuid4().hex
 
         card = Card.objects.create(
-            user=card_request.user,
-            name_on_card=card_request.name_on_card,
-            masked_pan=masked,
-            last4=last4,
-            expiry_month=expiry_month,
-            expiry_year=expiry_year,
-            card_token=token,
-            active=True,
-        )
+        user=card_request.user,
+        name_on_card=card_request.name_on_card,
+        card_number=pan,
+        last4=last4,
+        expiry_month=expiry_month,
+        expiry_year=expiry_year,
+        card_token=token,
+        active=True,
+    )
+
 
         card_request.status = "approved"
         card_request.save(update_fields=["status"])
